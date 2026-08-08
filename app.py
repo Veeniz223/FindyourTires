@@ -9,9 +9,10 @@ import urllib.parse
 TEN_CUAHANG = "THẾ GIỚI LỐP XE Ô TÔ CẦN THƠ"
 TEN_NHANVIEN = "Dương Hoàng Vinh"
 CHUC_DANH = "Nhân viên kinh doanh"
-HOTLINE = "0937971684"               # Nhập SĐT của ông
-ZALO_PHONE = "0937971684"            # SĐT Zalo nhận báo giá & lịch hẹn
-DIA_CHI = "176,Phạm Hùng,Cái Răng,TP Cần Thơ" 
+HOTLINE = "0937971684"               # Ông sửa lại SĐT của ông tại đây
+ZALO_PHONE = "0937971684"            # Ông sửa lại SĐT Zalo tại đây
+ZALO_LINK = f"https://zalo.me/{ZALO_PHONE}"
+DIA_CHI = "176, Phạm Hùng, Cái Răng, TP Cần Thơ" 
 # ==========================================
 
 # 1. Cấu hình trang Web
@@ -79,11 +80,10 @@ def chuyen_thanh_so(val):
     numbers_only = re.sub(r'[^\d]', '', s)
     return float(numbers_only) if numbers_only else 0.0
 
-# Hàm làm sạch chuỗi tìm kiếm (Loại bỏ dấu gạch ngang, khoảng trắng, ký tự đặc biệt)
+# Hàm làm sạch chuỗi tìm kiếm (Loại bỏ dấu gạch ngang, khoảng trắng)
 def clean_text(text):
     if pd.isna(text):
         return ""
-    # Chuyển thành chữ hoa và xóa sạch khoảng trắng, dấu gạch ngang, gạch dưới, chấm
     return re.sub(r'[\s\-_.\/\\]+', '', str(text)).upper()
 
 # 3. Đọc dữ liệu Excel
@@ -141,15 +141,10 @@ with tab1:
         raw_input = tim_kiem.strip()
         cleaned_input = clean_text(raw_input)
         
-        # Tách các từ riêng lẻ để tìm kiếm linh hoạt (VD: "MAZDA CX5" -> ["MAZDA", "CX5"])
         words = [clean_text(w) for w in re.split(r'\s+', raw_input) if clean_text(w)]
 
-        # Thuật toán lọc siêu thông minh: Bỏ qua mọi dấu gạch ngang & khoảng trắng
         def match_row(row):
-            # Tạo chuỗi đã làm sạch từ toàn bộ thông tin dòng
             row_cleaned_str = clean_text(" ".join(row.astype(str)))
-            
-            # Khớp nếu tìm thấy toàn bộ chuỗi nhập vào HOẶC từng từ nhập vào
             if cleaned_input in row_cleaned_str:
                 return True
             if words and all(w in row_cleaned_str for w in words):
