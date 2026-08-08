@@ -3,16 +3,19 @@ import streamlit as st
 import re
 
 # ==========================================
-# THÔNG TIN CỬA HÀNG CỦA ÔNG (SỬA LẠI TẠI ĐÂY)
+# THÔNG TIN CỬA HÀNG & NHÂN VIÊN (SỬA LẠI TẠI ĐÂY)
 # ==========================================
-HOTLINE = "0937971684"               # Nhập số điện thoại của ông
-ZALO_LINK = "https://zalo.me/0937971684" # Link Zalo tương ứng số điện thoại
-DIA_CHI = "176,Phạm Hùng,Cái Răng,TP Cần Thơ" # Nhập địa chỉ cửa hàng
+TEN_CUAHANG = "TRUNG TÂM LỐP XE Ô TÔ CẦN THƠ"
+TEN_NHANVIEN = "Dương Hoàng Vinh"
+CHUC_DANH = "Nhân viên kinh doanh"
+HOTLINE = "0900123456"               # Nhập số điện thoại của ông
+ZALO_LINK = "https://zalo.me/0900123456" # Link Zalo tương ứng
+DIA_CHI = "Cần Thơ, Việt Nam" # Nhập địa chỉ cửa hàng
 # ==========================================
 
 # 1. Cấu hình trang Web
 st.set_page_config(
-    page_title="Tư Vấn Lốp Xe Ô TÔ",
+    page_title=f"Tư Vấn Lốp Xe - {TEN_CUAHANG}",
     page_icon="🛞",
     layout="centered"
 )
@@ -30,7 +33,7 @@ st.markdown("""
         text-align: center;
         color: #FF4B4B;
         font-weight: 800;
-        font-size: 2.2rem;
+        font-size: 2rem;
         margin-bottom: 5px;
         text-transform: uppercase;
         letter-spacing: 1px;
@@ -38,7 +41,7 @@ st.markdown("""
     .sub-title {
         text-align: center;
         color: #9CA3AF;
-        font-size: 1rem;
+        font-size: 0.95rem;
         margin-bottom: 15px;
     }
 
@@ -47,15 +50,28 @@ st.markdown("""
         background: linear-gradient(135deg, #1e2638, #111827);
         border: 1px solid #FF4B4B;
         border-radius: 12px;
-        padding: 15px 20px;
+        padding: 18px 20px;
         text-align: center;
         margin-bottom: 25px;
         box-shadow: 0 4px 15px rgba(255, 75, 75, 0.15);
     }
-    .contact-info {
+    .store-name {
+        color: #FACC15;
+        font-size: 1.2rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+        letter-spacing: 0.5px;
+    }
+    .staff-info {
         color: #E5E7EB;
-        font-size: 0.95rem;
-        margin-bottom: 10px;
+        font-size: 1rem;
+        margin-bottom: 8px;
+    }
+    .contact-info {
+        color: #9CA3AF;
+        font-size: 0.9rem;
+        margin-bottom: 6px;
     }
     .contact-info strong {
         color: #38BDF8;
@@ -64,12 +80,12 @@ st.markdown("""
         display: flex;
         justify-content: center;
         gap: 12px;
-        margin-top: 8px;
+        margin-top: 12px;
     }
     .btn-call {
         background-color: #EF4444;
         color: white !important;
-        padding: 6px 16px;
+        padding: 8px 18px;
         border-radius: 20px;
         text-decoration: none;
         font-weight: bold;
@@ -79,7 +95,7 @@ st.markdown("""
     .btn-zalo {
         background-color: #0068FF;
         color: white !important;
-        padding: 6px 16px;
+        padding: 8px 18px;
         border-radius: 20px;
         text-decoration: none;
         font-weight: bold;
@@ -196,11 +212,13 @@ except Exception as e:
 st.markdown('<div class="main-title">🛞 TRỢ LÝ TƯ VẤN LỐP XE Ô TÔ</div>', unsafe_allow_html=True)
 st.markdown('<div class="sub-title">Tra cứu báo giá trọn gói & gợi ý phân khúc chuẩn xác 24/7</div>', unsafe_allow_html=True)
 
-# KHUNG HIỂN THỊ THÔNG TIN LIÊN HỆ & ĐỊA CHỈ
+# KHUNG HIỂN THỊ THÔNG TIN CỬA HÀNG & NHÂN VIÊN KINH DOANH
 st.markdown(f"""
 <div class="contact-box">
-    <div class="contact-info">📍 <b>Địa chỉ:</b> <strong>{DIA_CHI}</strong></div>
-    <div class="contact-info">📞 <b>Hotline / Zalo tư vấn:</b> <strong style="color: #FACC15; font-size: 1.1rem;">{HOTLINE}</strong></div>
+    <div class="store-name">🏢 {TEN_CUAHANG}</div>
+    <div class="staff-info">👨‍💼 <b>{CHUC_DANH}:</b> <span style="color: #6EE7B7; font-weight: bold;">{TEN_NHANVIEN}</span></div>
+    <div class="contact-info">📞 Hotline/Zalo: <strong style="color: #FACC15; font-size: 1.05rem;">{HOTLINE}</strong></div>
+    <div class="contact-info">📍 Địa chỉ: <strong>{DIA_CHI}</strong></div>
     <div class="btn-contact-container">
         <a href="tel:{HOTLINE}" class="btn-call">📞 BẤM GỌI NGAY</a>
         <a href="{ZALO_LINK}" target="_blank" class="btn-zalo">💬 NHẮN ZALO</a>
