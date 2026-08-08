@@ -6,13 +6,13 @@ import urllib.parse
 # ==========================================
 # THÔNG TIN CỬA HÀNG & NHÂN VIÊN KINH DOANH
 # ==========================================
-TEN_CUAHANG = "TRUNG TÂM LỐP XE Ô TÔ CẦN THƠ"
+TEN_CUAHANG = "THẾ GIỚI LỐP XE Ô TÔ CẦN THƠ"
 TEN_NHANVIEN = "Dương Hoàng Vinh"
 CHUC_DANH = "Nhân viên kinh doanh"
-HOTLINE = "0900123456"               # Nhập SĐT của ông
-ZALO_PHONE = "0900123456"            # SĐT Zalo nhận báo giá & lịch hẹn
-ZALO_LINK = f"https://zalo.me/{ZALO_PHONE}"
-DIA_CHI = "Cần Thơ, Việt Nam" 
+HOTLINE = "0937971684"               # Nhập SĐT của ông
+ZALO_PHONE = "0937971684"            # SĐT Zalo nhận báo giá & lịch hẹn
+DIA_CHI = "176,Phạm Hùng,Cái Răng,TP Cần Thơ
+ " 
 # ==========================================
 
 # 1. Cấu hình trang Web
@@ -80,6 +80,13 @@ def chuyen_thanh_so(val):
     numbers_only = re.sub(r'[^\d]', '', s)
     return float(numbers_only) if numbers_only else 0.0
 
+# Hàm làm sạch chuỗi tìm kiếm (Loại bỏ dấu gạch ngang, khoảng trắng, ký tự đặc biệt)
+def clean_text(text):
+    if pd.isna(text):
+        return ""
+    # Chuyển thành chữ hoa và xóa sạch khoảng trắng, dấu gạch ngang, gạch dưới, chấm
+    return re.sub(r'[\s\-_.\/\\]+', '', str(text)).upper()
+
 # 3. Đọc dữ liệu Excel
 @st.cache_data
 def load_data():
@@ -133,17 +140,27 @@ with tab1:
 
     if st.button("🚀 TÌM LỐP & XEM BÁO GIÁ TRỌN GÓI", type="primary", use_container_width=True):
         raw_input = tim_kiem.strip()
-        tu_khoa_list = [k.upper() for k in re.split(r'[\s\-_]+', raw_input) if len(k) > 1]
+        cleaned_input = clean_text(raw_input)
         
-        # Thuật toán lọc đa từ khóa thông minh
-        def filter_row(row):
-            full_str = " ".join(row.astype(str)).upper()
-            return all(k in full_str for k in tu_khoa_list)
+        # Tách các từ riêng lẻ để tìm kiếm linh hoạt (VD: "MAZDA CX5" -> ["MAZDA", "CX5"])
+        words = [clean_text(w) for w in re.split(r'\s+', raw_input) if clean_text(w)]
 
-        ket_qua = df[df.apply(filter_row, axis=1)]
+        # Thuật toán lọc siêu thông minh: Bỏ qua mọi dấu gạch ngang & khoảng trắng
+        def match_row(row):
+            # Tạo chuỗi đã làm sạch từ toàn bộ thông tin dòng
+            row_cleaned_str = clean_text(" ".join(row.astype(str)))
+            
+            # Khớp nếu tìm thấy toàn bộ chuỗi nhập vào HOẶC từng từ nhập vào
+            if cleaned_input in row_cleaned_str:
+                return True
+            if words and all(w in row_cleaned_str for w in words):
+                return True
+            return False
+
+        ket_qua = df[df.apply(match_row, axis=1)]
         
         if ket_qua.empty:
-            st.warning(f"Rất tiếc, không tìm thấy kết quả cho từ khóa '{raw_input}'!\n\n💡 **Mẹo:** Kiểm tra lại cột 'Dòng xe' trong file Excel xem đã liệt kê từ 'CX5' hoặc 'CX-5' chưa nhé.")
+            st.warning(f"Rất tiếc, không tìm thấy kết quả cho từ khóa '{raw_input}'!")
         else:
             st.success(f"✅ Tìm thấy **{len(ket_qua)}** lựa chọn phù hợp cho từ khóa **'{raw_input}'**")
             
@@ -191,7 +208,7 @@ with tab1:
 
                 st.markdown(f"""
                 <div class="tire-card">
-                    <div style="display: flex; justify-content: space-between; align-align: center;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div class="tire-name">🔹 {thuong_hieu if thuong_hieu else 'Lốp xe'} {ten_sp}</div>
                         {badge_html}
                     </div>
