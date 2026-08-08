@@ -11,8 +11,7 @@ TEN_NHANVIEN = "Dương Hoàng Vinh"
 CHUC_DANH = "Nhân viên kinh doanh"
 HOTLINE = "0937971684"               # Nhập SĐT của ông
 ZALO_PHONE = "0937971684"            # SĐT Zalo nhận báo giá & lịch hẹn
-DIA_CHI = "176,Phạm Hùng,Cái Răng,TP Cần Thơ
- " 
+DIA_CHI = "176,Phạm Hùng,Cái Răng,TP Cần Thơ" 
 # ==========================================
 
 # 1. Cấu hình trang Web
