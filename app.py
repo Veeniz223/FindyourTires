@@ -64,7 +64,6 @@ st.markdown("""
     .price-amount { color: #34d399; font-size: 1.4rem; font-weight: 800; }
     .detail-price { color: #d1d5db; font-size: 0.9rem; margin: 4px 0; }
     
-    /* Nút Zalo Báo Giá */
     .btn-zalo-quote {
         display: inline-block; background-color: #0068FF; color: white !important;
         padding: 10px 18px; border-radius: 8px; font-weight: bold;
@@ -126,25 +125,27 @@ tab1, tab2 = st.tabs(["🔍 TRA CỨU BÁO GIÁ LỐP", "📅 ĐẶT LỊCH HẸ
 with tab1:
     col1, col2 = st.columns([2, 1])
     with col1:
-        tim_kiem = st.text_input("🔍 Mã Size lốp HOẶC Tên Dòng Xe:", value="205/55R16", placeholder="Ví dụ: 205/55R16, Xpander, Innova...")
+        tim_kiem = st.text_input("🔍 Mã Size lốp HOẶC Tên Dòng Xe:", value="205/55R16", placeholder="Ví dụ: 205/55R16, CX5, Xpander...")
     with col2:
         nhu_cau = st.selectbox("🎯 Nhu cầu sử dụng:", ["Tất cả nhu cầu", "Chạy dịch vụ / Taxi", "Đi gia đình (Cần êm)"])
 
     st.markdown("<br>", unsafe_allow_html=True)
 
     if st.button("🚀 TÌM LỐP & XEM BÁO GIÁ TRỌN GÓI", type="primary", use_container_width=True):
-        tu_khoa = tim_kiem.strip().upper()
+        raw_input = tim_kiem.strip()
+        tu_khoa_list = [k.upper() for k in re.split(r'[\s\-_]+', raw_input) if len(k) > 1]
         
-        # Tìm kiếm thông minh: Tìm theo Size HOẶC tìm theo dòng xe
-        ket_qua = df[
-            (df['Size_Chuan'].str.contains(tu_khoa, na=False)) | 
-            (df.apply(lambda row: row.astype(str).str.upper().str.contains(tu_khoa).any(), axis=1))
-        ]
+        # Thuật toán lọc đa từ khóa thông minh
+        def filter_row(row):
+            full_str = " ".join(row.astype(str)).upper()
+            return all(k in full_str for k in tu_khoa_list)
+
+        ket_qua = df[df.apply(filter_row, axis=1)]
         
         if ket_qua.empty:
-            st.warning(f"Rất tiếc, không tìm thấy kết quả nào cho từ khóa '{tu_khoa}'!")
+            st.warning(f"Rất tiếc, không tìm thấy kết quả cho từ khóa '{raw_input}'!\n\n💡 **Mẹo:** Kiểm tra lại cột 'Dòng xe' trong file Excel xem đã liệt kê từ 'CX5' hoặc 'CX-5' chưa nhé.")
         else:
-            st.success(f"✅ Tìm thấy **{len(ket_qua)}** lựa chọn phù hợp cho từ khóa **'{tu_khoa}'**")
+            st.success(f"✅ Tìm thấy **{len(ket_qua)}** lựa chọn phù hợp cho từ khóa **'{raw_input}'**")
             
             for index, row in ket_qua.iterrows():
                 thuong_hieu, ten_sp, dong_xe = "", "", ""
@@ -168,7 +169,6 @@ with tab1:
 
                 tong_tien = val_gia_lop + val_gia_keo
                 
-                # Phân loại nhu cầu
                 str_th = thuong_hieu.lower()
                 if any(h in str_th for h in ['michelin', 'bridgestone', 'continental', 'goodyear']):
                     tu_van = "🌟 **Cao Cấp:** Cách âm siêu vượt trội, bám đường mưa tốt, cực kỳ êm ái cho xe gia đình."
@@ -186,14 +186,12 @@ with tab1:
                 if nhu_cau == "Chạy dịch vụ / Taxi" and phan_khuc == "Gia đình / Cao cấp": continue
                 if nhu_cau == "Đi gia đình (Cần êm)" and phan_khuc == "Dịch vụ / Tiết kiệm": continue
 
-                # Soạn sẵn nội dung tin nhắn Báo Giá Zalo
                 text_zalo = f"Chào bạn, {TEN_CUAHANG} xin gửi báo giá lốp {thuong_hieu} {ten_sp}:\n- Giá lốp: {val_gia_lop:,.0f}đ/quả\n- Tráng keo chống đinh: {val_gia_keo:,.0f}đ/quả\n👉 TỔNG TRỌN GÓI: {tong_tien:,.0f}đ/quả.\nTư vấn trực tiếp: {TEN_NHANVIEN} ({HOTLINE})"
                 zalo_quote_url = f"https://zalo.me/{ZALO_PHONE}?text={urllib.parse.quote(text_zalo)}"
 
-                # Hiển thị Thẻ Báo Giá
                 st.markdown(f"""
                 <div class="tire-card">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; justify-content: space-between; align-align: center;">
                         <div class="tire-name">🔹 {thuong_hieu if thuong_hieu else 'Lốp xe'} {ten_sp}</div>
                         {badge_html}
                     </div>
