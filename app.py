@@ -5,12 +5,12 @@ import re
 # ==========================================
 # THÔNG TIN CỬA HÀNG & NHÂN VIÊN (SỬA LẠI TẠI ĐÂY)
 # ==========================================
-TEN_CUAHANG = "TRUNG TÂM LỐP XE Ô TÔ CẦN THƠ"
+TEN_CUAHANG = "Thế giới lốp xe oto Cần Thơ"
 TEN_NHANVIEN = "Dương Hoàng Vinh"
 CHUC_DANH = "Nhân viên kinh doanh"
-HOTLINE = "0900123456"               # Nhập số điện thoại của ông
-ZALO_LINK = "https://zalo.me/0900123456" # Link Zalo tương ứng
-DIA_CHI = "Cần Thơ, Việt Nam" # Nhập địa chỉ cửa hàng
+HOTLINE = "0937971684"               # Nhập số điện thoại của ông
+ZALO_LINK = "https://zalo.me/0937971684" # Link Zalo tương ứng
+DIA_CHI = "176,Phạm Hùng,Cái Răng,TP Cần Thơ" # Nhập địa chỉ cửa hàng
 # ==========================================
 
 # 1. Cấu hình trang Web
