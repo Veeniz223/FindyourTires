@@ -2,6 +2,14 @@ import pandas as pd
 import streamlit as st
 import re
 
+# ==========================================
+# THÔNG TIN CỬA HÀNG CỦA ÔNG (SỬA LẠI TẠI ĐÂY)
+# ==========================================
+HOTLINE = "0937971684"               # Nhập số điện thoại của ông
+ZALO_LINK = "https://zalo.me/0937971684" # Link Zalo tương ứng số điện thoại
+DIA_CHI = "176,Phạm Hùng,Cái Răng,TP Cần Thơ" # Nhập địa chỉ cửa hàng
+# ==========================================
+
 # 1. Cấu hình trang Web
 st.set_page_config(
     page_title="Tư Vấn Lốp Xe Ô TÔ",
@@ -9,7 +17,7 @@ st.set_page_config(
     layout="centered"
 )
 
-# 2. Tùy chỉnh Giao diện CSS Chuyên Nghiệp
+# 2. Tùy chỉnh Giao diện CSS
 st.markdown("""
     <style>
     /* Nền chính & Font chữ */
@@ -31,7 +39,52 @@ st.markdown("""
         text-align: center;
         color: #9CA3AF;
         font-size: 1rem;
+        margin-bottom: 15px;
+    }
+
+    /* Khung Liên hệ Hotline & Địa chỉ */
+    .contact-box {
+        background: linear-gradient(135deg, #1e2638, #111827);
+        border: 1px solid #FF4B4B;
+        border-radius: 12px;
+        padding: 15px 20px;
+        text-align: center;
         margin-bottom: 25px;
+        box-shadow: 0 4px 15px rgba(255, 75, 75, 0.15);
+    }
+    .contact-info {
+        color: #E5E7EB;
+        font-size: 0.95rem;
+        margin-bottom: 10px;
+    }
+    .contact-info strong {
+        color: #38BDF8;
+    }
+    .btn-contact-container {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        margin-top: 8px;
+    }
+    .btn-call {
+        background-color: #EF4444;
+        color: white !important;
+        padding: 6px 16px;
+        border-radius: 20px;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 0.88rem;
+        display: inline-block;
+    }
+    .btn-zalo {
+        background-color: #0068FF;
+        color: white !important;
+        padding: 6px 16px;
+        border-radius: 20px;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 0.88rem;
+        display: inline-block;
     }
 
     /* Thẻ Sản Phẩm (Card) */
@@ -42,10 +95,6 @@ st.markdown("""
         margin-bottom: 20px;
         border: 1px solid #2e3b52;
         box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        transition: transform 0.2s ease;
-    }
-    .tire-card:hover {
-        border-color: #FF4B4B;
     }
 
     /* Tên Sản Phẩm */
@@ -102,7 +151,6 @@ st.markdown("""
         font-weight: 800;
     }
     
-    /* Chi tiết giá lẻ */
     .detail-price {
         color: #d1d5db;
         font-size: 0.9rem;
@@ -111,7 +159,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Hàm chuyển đổi định dạng tiền thành số
+# Hàm chuyển đổi định dạng tiền
 def chuyen_thanh_so(val):
     if pd.isna(val):
         return 0.0
@@ -147,6 +195,18 @@ except Exception as e:
 # Header Giao diện
 st.markdown('<div class="main-title">🛞 TRỢ LÝ TƯ VẤN LỐP XE Ô TÔ</div>', unsafe_allow_html=True)
 st.markdown('<div class="sub-title">Tra cứu báo giá trọn gói & gợi ý phân khúc chuẩn xác 24/7</div>', unsafe_allow_html=True)
+
+# KHUNG HIỂN THỊ THÔNG TIN LIÊN HỆ & ĐỊA CHỈ
+st.markdown(f"""
+<div class="contact-box">
+    <div class="contact-info">📍 <b>Địa chỉ:</b> <strong>{DIA_CHI}</strong></div>
+    <div class="contact-info">📞 <b>Hotline / Zalo tư vấn:</b> <strong style="color: #FACC15; font-size: 1.1rem;">{HOTLINE}</strong></div>
+    <div class="btn-contact-container">
+        <a href="tel:{HOTLINE}" class="btn-call">📞 BẤM GỌI NGAY</a>
+        <a href="{ZALO_LINK}" target="_blank" class="btn-zalo">💬 NHẮN ZALO</a>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
 # Khung Tìm Kiếm
 with st.container():
@@ -194,7 +254,6 @@ if st.button("🚀 TÌM LỐP & XEM BÁO GIÁ TRỌN GÓI", type="primary", use_
 
             tong_tien = val_gia_lop + val_gia_keo
             
-            # Phân loại & Gắn badge
             str_th = thuong_hieu.lower()
             if any(h in str_th for h in ['michelin', 'bridgestone', 'continental', 'goodyear']):
                 tu_van = "🌟 **Cao Cấp:** Cách âm siêu vượt trội, bám đường mưa tốt, cực kỳ êm ái cho xe gia đình."
@@ -206,16 +265,14 @@ if st.button("🚀 TÌM LỐP & XEM BÁO GIÁ TRỌN GÓI", type="primary", use_
                 phan_khuc = "Tầm trung"
             else:
                 tu_van = "💰 **Tiết Kiệm:** Gai cực bền, chịu tải tốt, giá rẻ giúp tối ưu vốn nhanh cho xe dịch vụ/Grab."
-                badge_html = '<span class="badge-tiet-kiem">DỊCH VỤ / TỐI ƯU CHÍPHÍ</span>'
+                badge_html = '<span class="badge-tiet-kiem">DỊCH VỤ / TỐI ƯU CHÍ PHÍ</span>'
                 phan_khuc = "Dịch vụ / Tiết kiệm"
 
-            # Lọc nhu cầu
             if nhu_cau == "Chạy dịch vụ / Taxi" and phan_khuc == "Gia đình / Cao cấp":
                 continue
             if nhu_cau == "Đi gia đình (Cần êm)" and phan_khuc == "Dịch vụ / Tiết kiệm":
                 continue
 
-            # Render Giao diện Thẻ Sản Phẩm
             st.markdown(f"""
             <div class="tire-card">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
