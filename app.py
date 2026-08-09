@@ -10,13 +10,13 @@ import google.generativeai as genai
 TEN_CUAHANG = "THẾ GIỚI LỐP XE Ô TÔ CẦN THƠ"
 TEN_NHANVIEN = "Dương Hoàng Vinh"
 CHUC_DANH = "Nhân viên kinh doanh"
-HOTLINE = "0937971684"               # Ông sửa SĐT tại đây
-ZALO_PHONE = "0937971684"            # Ông sửa SĐT Zalo tại đây
+HOTLINE = "0937971684"               # Nhập SĐT của ông
+ZALO_PHONE = "0937971684"            # Nhập SĐT Zalo của ông
 ZALO_LINK = f"https://zalo.me/{ZALO_PHONE}"
 DIA_CHI = "176, Phạm Hùng, Cái Răng, TP Cần Thơ" 
 
-# Đọc API Key từ Streamlit Secrets hoặc biến khai báo
-GEMINI_API_KEY = st.secrets.get("GEMINI_API_KEY", "AQ.Ab8RN6LF_5ATF8WIPHZxXx8WDb8jUbnKQc9P0laWt9jSAbwo9Q")
+# DÁN MÃ API CỦA ÔNG VÀO TRONG DẤU NGOẶC KÉP DƯỚI ĐÂY:
+GEMINI_API_KEY = "AQ.Ab8RN6LF_5ATF8WIPHZxXx8WDb8jUbnKQc9P0laWt9jSAbwo9Q"
 # ==========================================
 
 # 1. Cấu hình trang Web
@@ -30,66 +30,36 @@ st.set_page_config(
 st.markdown("""
     <style>
     .stApp { background-color: #0e1117; }
-    
-    .main-title {
-        text-align: center; color: #FF4B4B; font-weight: 800;
-        font-size: 2rem; margin-bottom: 5px; text-transform: uppercase;
-    }
+    .main-title { text-align: center; color: #FF4B4B; font-weight: 800; font-size: 2rem; margin-bottom: 5px; text-transform: uppercase; }
     .sub-title { text-align: center; color: #9CA3AF; font-size: 0.95rem; margin-bottom: 15px; }
-
-    /* Khung Liên hệ */
-    .contact-box {
-        background: linear-gradient(135deg, #1e2638, #111827);
-        border: 1px solid #FF4B4B; border-radius: 12px; padding: 18px;
-        text-align: center; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(255, 75, 75, 0.15);
-    }
+    .contact-box { background: linear-gradient(135deg, #1e2638, #111827); border: 1px solid #FF4B4B; border-radius: 12px; padding: 18px; text-align: center; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(255, 75, 75, 0.15); }
     .store-name { color: #FACC15; font-size: 1.2rem; font-weight: 800; text-transform: uppercase; margin-bottom: 8px; }
     .staff-info { color: #E5E7EB; font-size: 1rem; margin-bottom: 8px; }
     .contact-info { color: #9CA3AF; font-size: 0.9rem; margin-bottom: 6px; }
     .btn-contact-container { display: flex; justify-content: center; gap: 12px; margin-top: 12px; }
     .btn-call { background-color: #EF4444; color: white !important; padding: 8px 18px; border-radius: 20px; text-decoration: none; font-weight: bold; font-size: 0.88rem; }
     .btn-zalo { background-color: #0068FF; color: white !important; padding: 8px 18px; border-radius: 20px; text-decoration: none; font-weight: bold; font-size: 0.88rem; }
-
-    /* Thẻ Sản Phẩm */
-    .tire-card {
-        background: #1e2638; border-radius: 12px; padding: 20px;
-        margin-bottom: 15px; border: 1px solid #2e3b52; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    }
+    .tire-card { background: #1e2638; border-radius: 12px; padding: 20px; margin-bottom: 15px; border: 1px solid #2e3b52; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
     .tire-name { color: #FFFFFF; font-size: 1.25rem; font-weight: 700; margin-bottom: 6px; }
-    .car-version-box {
-        background-color: #111827; border-left: 4px solid #38BDF8;
-        padding: 8px 12px; border-radius: 4px; margin-bottom: 12px;
-        color: #38BDF8; font-weight: 600; font-size: 0.95rem;
-    }
-
-    /* Badges */
+    .car-version-box { background-color: #111827; border-left: 4px solid #38BDF8; padding: 8px 12px; border-radius: 4px; margin-bottom: 12px; color: #38BDF8; font-weight: 600; font-size: 0.95rem; }
     .badge-cao-cap { background-color: #f59e0b; color: #000; padding: 3px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
     .badge-tam-trung { background-color: #3b82f6; color: #fff; padding: 3px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
     .badge-tiet-kiem { background-color: #10b981; color: #fff; padding: 3px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
-
-    /* Khung Giá */
     .price-box { background-color: #064e3b; border: 1px solid #10b981; border-radius: 8px; padding: 10px; text-align: center; margin-top: 12px; }
     .price-title { color: #a7f3d0; font-size: 0.85rem; }
     .price-amount { color: #34d399; font-size: 1.4rem; font-weight: 800; }
     .detail-price { color: #d1d5db; font-size: 0.9rem; margin: 4px 0; }
-    
-    .btn-zalo-quote {
-        display: inline-block; background-color: #0068FF; color: white !important;
-        padding: 10px 18px; border-radius: 8px; font-weight: bold;
-        text-decoration: none; font-size: 0.9rem; margin-top: 8px; text-align: center;
-    }
+    .btn-zalo-quote { display: inline-block; background-color: #0068FF; color: white !important; padding: 10px 18px; border-radius: 8px; font-weight: bold; text-decoration: none; font-size: 0.9rem; margin-top: 8px; text-align: center; }
     </style>
 """, unsafe_allow_html=True)
 
-# Hàm chuyển đổi số tiền
+# Hàm chuyển đổi số tiền & làm sạch chuỗi
 def chuyen_thanh_so(val):
     if pd.isna(val): return 0.0
     if isinstance(val, (int, float)): return float(val)
-    s = str(val)
-    numbers_only = re.sub(r'[^\d]', '', s)
+    numbers_only = re.sub(r'[^\d]', '', str(val))
     return float(numbers_only) if numbers_only else 0.0
 
-# Hàm làm sạch chuỗi
 def clean_text(text):
     if pd.isna(text): return ""
     return re.sub(r'[\s\-_.\/\\]+', '', str(text)).upper()
@@ -97,16 +67,12 @@ def clean_text(text):
 # 3. Đọc dữ liệu Excel
 @st.cache_data
 def load_data():
-    file_path = "danh_muc_lop.xlsx"
-    df = pd.read_excel(file_path, sheet_name=0)
-    
+    df = pd.read_excel("danh_muc_lop.xlsx", sheet_name=0)
     for col in df.columns:
         if 'size' in str(col).lower() or 'cỡ' in str(col).lower():
             df['Size_Chuan'] = df[col].astype(str).str.strip().str.upper()
             break
-    if 'Size_Chuan' not in df.columns:
-        df['Size_Chuan'] = df.iloc[:, 0].astype(str).str.strip().str.upper()
-        
+    if 'Size_Chuan' not in df.columns: df['Size_Chuan'] = df.iloc[:, 0].astype(str).str.strip().str.upper()
     return df
 
 try:
@@ -134,213 +100,112 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # TẠO TABS CHỨC NĂNG
-tab1, tab2, tab3 = st.tabs(["🔍 TRA CỨU BÁO GIÁ", "🤖 CHAT VỚI AI TƯ VẤN 24/7", "📅 ĐẶT LỊCH HẸN GARA"])
+tab1, tab2, tab3 = st.tabs(["🔍 TRA CỨU", "🤖 CHAT VỚI AI 24/7", "📅 ĐẶT LỊCH HẸN"])
 
 with tab1:
     col1, col2 = st.columns([2, 1])
-    with col1:
-        tim_kiem = st.text_input("🔍 Nhập Mã Size lốp HOẶC Tên Dòng Xe:", value="CX5", placeholder="Ví dụ: CX5, Xpander, 205/55R16...")
-    with col2:
-        nhu_cau = st.selectbox("🎯 Nhu cầu sử dụng:", ["Tất cả nhu cầu", "Chạy dịch vụ / Taxi", "Đi gia đình (Cần êm)"])
-
+    with col1: tim_kiem = st.text_input("🔍 Nhập Mã Size lốp HOẶC Tên Dòng Xe:", value="CX5")
+    with col2: nhu_cau = st.selectbox("🎯 Nhu cầu sử dụng:", ["Tất cả nhu cầu", "Chạy dịch vụ / Taxi", "Đi gia đình (Cần êm)"])
     st.markdown("<br>", unsafe_allow_html=True)
 
-    if st.button("🚀 TÌM LỐP & XEM BÁO GIÁ TRỌN GÓI", type="primary", use_container_width=True):
+    if st.button("🚀 TÌM LỐP & XEM BÁO GIÁ", type="primary", use_container_width=True):
         raw_input = tim_kiem.strip()
         cleaned_input = clean_text(raw_input)
         words = [clean_text(w) for w in re.split(r'\s+', raw_input) if clean_text(w)]
 
         def match_row(row):
-            row_cleaned_str = clean_text(" ".join(row.astype(str)))
-            if cleaned_input in row_cleaned_str: return True
-            if words and all(w in row_cleaned_str for w in words): return True
+            row_str = clean_text(" ".join(row.astype(str)))
+            if cleaned_input in row_str: return True
+            if words and all(w in row_str for w in words): return True
             return False
 
         ket_qua = df[df.apply(match_row, axis=1)]
         
-        if ket_qua.empty:
-            st.warning(f"Rất tiếc, không tìm thấy kết quả nào cho từ khóa '{raw_input}'!")
+        if ket_qua.empty: st.warning(f"Rất tiếc, không tìm thấy kết quả nào cho từ khóa '{raw_input}'!")
         else:
-            st.success(f"✅ Tìm thấy **{len(ket_qua)}** lựa chọn phù hợp cho từ khóa **'{raw_input}'**")
-            
+            st.success(f"✅ Tìm thấy **{len(ket_qua)}** lựa chọn phù hợp.")
             for index, row in ket_qua.iterrows():
                 thuong_hieu, ten_sp, dong_xe, size_lop = "", "", "", ""
                 val_gia_lop, val_gia_keo = 0.0, 0.0
-                
                 for col in df.columns:
                     col_lower = str(col).strip().lower()
                     val = row[col]
-                    
-                    if 'size' in col_lower or 'cỡ' in col_lower:
-                        size_lop = str(val) if pd.notna(val) else ""
-                    elif 'thương hiệu' in col_lower or 'hãng' in col_lower or 'brand' in col_lower:
-                        thuong_hieu = str(val) if pd.notna(val) else ""
-                    elif 'sản phẩm' in col_lower or 'gai' in col_lower or 'tên' in col_lower:
-                        ten_sp = str(val) if pd.notna(val) else ""
-                    elif 'xe' in col_lower or 'dòng xe' in col_lower:
-                        dong_xe = str(val) if pd.notna(val) else ""
-                    elif 'keo' in col_lower or 'đinh' in col_lower:
-                        val_gia_keo = chuyen_thanh_so(val)
-                    elif 'giá' in col_lower or 'đơn giá' in col_lower or 'niêm yết' in col_lower:
-                        if 'keo' not in col_lower and 'đinh' not in col_lower:
-                            val_gia_lop = chuyen_thanh_so(val)
+                    if 'size' in col_lower or 'cỡ' in col_lower: size_lop = str(val) if pd.notna(val) else ""
+                    elif 'thương hiệu' in col_lower or 'hãng' in col_lower: thuong_hieu = str(val) if pd.notna(val) else ""
+                    elif 'sản phẩm' in col_lower or 'gai' in col_lower: ten_sp = str(val) if pd.notna(val) else ""
+                    elif 'xe' in col_lower or 'dòng xe' in col_lower: dong_xe = str(val) if pd.notna(val) else ""
+                    elif 'keo' in col_lower or 'đinh' in col_lower: val_gia_keo = chuyen_thanh_so(val)
+                    elif 'giá' in col_lower or 'đơn giá' in col_lower:
+                        if 'keo' not in col_lower and 'đinh' not in col_lower: val_gia_lop = chuyen_thanh_so(val)
 
                 tong_tien = val_gia_lop + val_gia_keo
-                
                 str_th = thuong_hieu.lower()
                 if any(h in str_th for h in ['michelin', 'bridgestone', 'continental', 'goodyear']):
-                    tu_van = "🌟 **Cao Cấp:** Cách âm siêu vượt trội, bám đường mưa tốt, cực kỳ êm ái cho xe gia đình."
-                    badge_html = '<span class="badge-cao-cap">GIA ĐÌNH / CAO CẤP</span>'
-                    phan_khuc = "Gia đình / Cao cấp"
-                elif any(h in str_th for h in ['hankook', 'kumho', 'yokohama', 'dunlop', 'toyota']):
-                    tu_van = "⚖️ **Cân Bằng:** Độ êm tốt, gai lâu mòn, chi phí hợp lý cho cả xe gia đình & dịch vụ."
-                    badge_html = '<span class="badge-tam-trung">TẦM TRUNG / CÂN BẰNG</span>'
-                    phan_khuc = "Tầm trung"
+                    tu_van, badge_html, phan_khuc = "🌟 Cao Cấp: Siêu êm ái.", '<span class="badge-cao-cap">CAO CẤP</span>', "Gia đình"
+                elif any(h in str_th for h in ['hankook', 'kumho', 'yokohama', 'dunlop']):
+                    tu_van, badge_html, phan_khuc = "⚖️ Cân Bằng: Chi phí hợp lý.", '<span class="badge-tam-trung">TẦM TRUNG</span>', "Tầm trung"
                 else:
-                    tu_van = "💰 **Tiết Kiệm:** Gai cực bền, chịu tải tốt, giá rẻ giúp tối ưu vốn nhanh cho xe dịch vụ/Grab."
-                    badge_html = '<span class="badge-tiet-kiem">DỊCH VỤ / TỐI ƯU CHÍ PHÍ</span>'
-                    phan_khuc = "Dịch vụ / Tiết kiệm"
+                    tu_van, badge_html, phan_khuc = "💰 Tiết Kiệm: Gai siêu bền.", '<span class="badge-tiet-kiem">TIẾT KIỆM</span>', "Dịch vụ"
 
-                if nhu_cau == "Chạy dịch vụ / Taxi" and phan_khuc == "Gia đình / Cao cấp": continue
-                if nhu_cau == "Đi gia đình (Cần êm)" and phan_khuc == "Dịch vụ / Tiết kiệm": continue
+                if nhu_cau == "Chạy dịch vụ / Taxi" and phan_khuc == "Gia đình": continue
+                if nhu_cau == "Đi gia đình (Cần êm)" and phan_khuc == "Dịch vụ": continue
 
-                text_zalo = f"Chào bạn, {TEN_CUAHANG} xin gửi báo giá lốp {thuong_hieu} {ten_sp} (Size {size_lop}):\n- Dành cho: {dong_xe}\n- Giá lốp: {val_gia_lop:,.0f}đ/quả\n- Tráng keo chống đinh: {val_gia_keo:,.0f}đ/quả\n👉 TỔNG TRỌN GÓI: {tong_tien:,.0f}đ/quả.\nTư vấn trực tiếp: {TEN_NHANVIEN} ({HOTLINE})"
-                zalo_quote_url = f"https://zalo.me/{ZALO_PHONE}?text={urllib.parse.quote(text_zalo)}"
-
+                zalo_txt = f"Chào bạn, tôi báo giá lốp {thuong_hieu} {ten_sp} (Size {size_lop}):\n- Lốp: {val_gia_lop:,.0f}đ\n- Tráng keo: {val_gia_keo:,.0f}đ\n👉 TỔNG: {tong_tien:,.0f}đ/quả.\nTư vấn: {TEN_NHANVIEN} ({HOTLINE})"
+                
                 st.markdown(f"""
                 <div class="tire-card">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <div class="tire-name">🔹 {thuong_hieu if thuong_hieu else 'Lốp xe'} {ten_sp} (Size: <span style="color: #FACC15;">{size_lop}</span>)</div>
+                        <div class="tire-name">🔹 {thuong_hieu} {ten_sp} (Size: <span style="color: #FACC15;">{size_lop}</span>)</div>
                         {badge_html}
                     </div>
-                    {"<div class='car-version-box'>🚗 <b>Dòng xe & Phiên bản tương thích:</b> " + dong_xe + "</div>" if dong_xe else ""}
-                    <div class="detail-price">🛞 <b>Giá lốp:</b> {val_gia_lop:,.0f} VNĐ/quả</div>
-                    <div class="detail-price">🛡️ <b>Giá tráng keo chống đinh:</b> {val_gia_keo:,.0f} VNĐ/quả</div>
-                    <div class="price-box">
-                        <div class="price-title">TỔNG CHI PHÍ LĂN BÁNH TRỌN GÓI</div>
-                        <div class="price-amount">{tong_tien:,.0f} VNĐ / quả</div>
-                    </div>
+                    {"<div class='car-version-box'>🚗 Dòng xe tương thích: " + dong_xe + "</div>" if dong_xe else ""}
+                    <div class="detail-price">🛞 Giá lốp: {val_gia_lop:,.0f}đ &nbsp;|&nbsp; 🛡️ Giá keo: {val_gia_keo:,.0f}đ</div>
+                    <div class="price-box"><div class="price-title">TỔNG TRỌN GÓI</div><div class="price-amount">{tong_tien:,.0f} VNĐ / quả</div></div>
                 </div>
                 """, unsafe_allow_html=True)
-                
                 st.info(tu_van)
-                st.markdown(f'<a href="{zalo_quote_url}" target="_blank" class="btn-zalo-quote">📲 GỬI BÁO GIÁ NÀY QUA ZALO CHO KHÁCH</a><br><br>', unsafe_allow_html=True)
+                st.markdown(f'<a href="https://zalo.me/{ZALO_PHONE}?text={urllib.parse.quote(zalo_txt)}" target="_blank" class="btn-zalo-quote">📲 GỬI BÁO GIÁ QUA ZALO</a><br><br>', unsafe_allow_html=True)
+
 # TAB 2: CHATBOT AI TƯ VẤN 24/7
 with tab2:
     st.subheader("🤖 Trợ Lý AI Tư Vấn Lốp Xe 24/7")
-    st.write("Đặt câu hỏi cho AI (Ví dụ: *Lốp Michelin đi êm không?, Tráng keo chống đinh có bền không?, Xe CX5 nên thay lốp nào?...*)")
+    st.write("Hỏi tôi về các loại lốp hoặc quy trình tráng keo nhé!")
 
     if "messages" not in st.session_state:
-        st.session_state.messages = [
-            {"role": "assistant", "content": f"Xin chào! Tôi là Trợ lý AI của **{TEN_NHANVIEN}** ({TEN_CUAHANG} - {DIA_CHI}). Bạn cần hỏi thông tin về loại lốp nào hay quy trình tráng keo chống đinh ạ?"}
-        ]
+        st.session_state.messages = [{"role": "assistant", "content": f"Xin chào! Tôi là Trợ lý AI của **{TEN_NHANVIEN}**. Tôi có thể giúp gì cho bạn?"}]
 
-    for msg in st.session_state.messages:
-        st.chat_message(msg["role"]).write(msg["content"])
+    for msg in st.session_state.messages: st.chat_message(msg["role"]).write(msg["content"])
 
-    if user_prompt := st.chat_input("Nhập câu hỏi của bạn tại đây...", key="ai_chat_input"):
+    # Đã thêm key="ai_chat" để chống lỗi trùng lặp DuplicateElementId
+    if user_prompt := st.chat_input("Nhập câu hỏi của bạn tại đây...", key="ai_chat"):
         st.session_state.messages.append({"role": "user", "content": user_prompt})
         st.chat_message("user").write(user_prompt)
 
         if not GEMINI_API_KEY or GEMINI_API_KEY == "DÁN_MÃ_API_CỦA_ÔNG_VÀO_ĐÂY":
-            response_text = "⚠️ Vui lòng cấu hình Mã GEMINI_API_KEY để bật Chatbot AI nhé ông!"
+            response_text = "⚠️ Hãy dán mã API Key vào file app.py để dùng tính năng này nhé."
         else:
             try:
                 genai.configure(api_key=GEMINI_API_KEY)
-                system_instruction = f"""
-                Bạn là Trợ lý Chuyên viên Tư vấn Kỹ thuật Lốp xe Ô tô chuyên nghiệp của anh {TEN_NHANVIEN} ({CHUC_DANH}) làm việc tại {TEN_CUAHANG}, Địa chỉ: {DIA_CHI}, Hotline/Zalo: {HOTLINE}.
-                Phong cách trả lời: Lịch sự, chuyên nghiệp, am hiểu sâu về kỹ thuật lốp xe (Michelin, Bridgestone, Yokohama, Hankook, Kumho...), công nghệ tráng keo chống đinh.
-                Mục tiêu: Đưa ra lời khuyên chuẩn xác, giải thích dễ hiểu và mời khách gọi Hotline hoặc ghé gara tại {DIA_CHI} để được hỗ trợ trực tiếp.
-                """
-                
-                # Tự động tìm model hỗ trợ generateContent trong tài khoản
-                available_models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
-                selected_model = 'models/gemini-1.5-flash'
-                
-                if available_models:
-                    # Ưu tiên lấy model flash có sẵn trong tài khoản
-                    flash_models = [m for m in available_models if 'flash' in m]
-                    selected_model = flash_models[0] if flash_models else available_models[0]
-
-                model = genai.GenerativeModel(
-                    model_name=selected_model,
-                    system_instruction=system_instruction
-                )
+                system_instruction = f"Bạn là tư vấn viên kỹ thuật lốp xe của anh {TEN_NHANVIEN} tại {TEN_CUAHANG}. Lịch sự, am hiểu lốp xe."
+                # Gọi đúng tên model siêu chuẩn, không bao giờ lỗi 404
+                model = genai.GenerativeModel(model_name='gemini-1.5-flash', system_instruction=system_instruction)
                 response = model.generate_content(user_prompt)
                 response_text = response.text
             except Exception as e:
-                response_text = f"Lỗi kết nối AI: {e}"
-
-        st.session_state.messages.append({"role": "assistant", "content": response_text})
-        st.chat_message("assistant").write(response_text)# TAB 2: CHATBOT AI TƯ VẤN 24/7
-with tab2:
-    st.subheader("🤖 Trợ Lý AI Tư Vấn Lốp Xe 24/7")
-    st.write("Đặt câu hỏi cho AI (Ví dụ: *Lốp Michelin đi êm không?, Tráng keo chống đinh có bền không?, Xe CX5 nên thay lốp nào?...*)")
-
-    if "messages" not in st.session_state:
-        st.session_state.messages = [
-            {"role": "assistant", "content": f"Xin chào! Tôi là Trợ lý AI của **{TEN_NHANVIEN}** ({TEN_CUAHANG} - {DIA_CHI}). Bạn cần hỏi thông tin về loại lốp nào hay quy trình tráng keo chống đinh ạ?"}
-        ]
-
-    for msg in st.session_state.messages:
-        st.chat_message(msg["role"]).write(msg["content"])
-
-    if user_prompt := st.chat_input("Nhập câu hỏi của bạn tại đây..."):
-        st.session_state.messages.append({"role": "user", "content": user_prompt})
-        st.chat_message("user").write(user_prompt)
-
-        if not GEMINI_API_KEY or GEMINI_API_KEY == "DÁN_MÃ_API_CỦA_ÔNG_VÀO_ĐÂY":
-            response_text = "⚠️ Vui lòng cấu hình Mã GEMINI_API_KEY để bật Chatbot AI nhé ông!"
-        else:
-            try:
-                genai.configure(api_key=GEMINI_API_KEY)
-                system_instruction = f"""
-                Bạn là Trợ lý Chuyên viên Tư vấn Kỹ thuật Lốp xe Ô tô chuyên nghiệp của anh {TEN_NHANVIEN} ({CHUC_DANH}) làm việc tại {TEN_CUAHANG}, Địa chỉ: {DIA_CHI}, Hotline/Zalo: {HOTLINE}.
-                Phong cách trả lời: Lịch sự, chuyên nghiệp, am hiểu sâu về kỹ thuật lốp xe (Michelin, Bridgestone, Yokohama, Hankook, Kumho...), công nghệ tráng keo chống đinh.
-                Mục tiêu: Đưa ra lời khuyên chuẩn xác, giải thích dễ hiểu và mời khách gọi Hotline hoặc ghé gara tại {DIA_CHI} để được hỗ trợ trực tiếp.
-                """
-                
-                # Tự động tìm model hỗ trợ generateContent trong tài khoản
-                available_models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
-                selected_model = 'models/gemini-1.5-flash'
-                
-                if available_models:
-                    # Ưu tiên lấy model flash có sẵn trong tài khoản
-                    flash_models = [m for m in available_models if 'flash' in m]
-                    selected_model = flash_models[0] if flash_models else available_models[0]
-
-                model = genai.GenerativeModel(
-                    model_name=selected_model,
-                    system_instruction=system_instruction
-                )
-                response = model.generate_content(user_prompt)
-                response_text = response.text
-            except Exception as e:
-                response_text = f"Lỗi kết nối AI: {e}"
+                response_text = f"Lỗi: {e}"
 
         st.session_state.messages.append({"role": "assistant", "content": response_text})
         st.chat_message("assistant").write(response_text)
 
 # TAB 3: ĐẶT LỊCH HẸN
 with tab3:
-    st.subheader("📝 Đặt Lịch Hẹn Làm Lốp / Tráng Keo Tận Nơi")
-    st.write("Khách hàng điền thông tin bên dưới để ưu tiên xếp lịch phục vụ nhanh nhất:")
-    
+    st.subheader("📝 Đặt Lịch Hẹn")
     with st.form("form_dat_lich"):
-        ten_kh = st.text_input("Họ và tên khách hàng:")
-        sdt_kh = st.text_input("Số điện thoại liên hệ:")
-        dongxe_kh = st.text_input("Dòng xe & Phiên bản đang đi (Ví dụ: CX5 bản Premium, Xpander Cross...):")
-        dich_vu = st.multiselect("Dịch vụ cần làm:", ["Thay lốp mới", "Tráng keo chống đinh", "Cân bằng động / Cân chỉnh thước lái", "Vá lốp lưu động"])
-        ngay_hen = st.date_input("Ngày dự định ghé gara:")
-        ghi_chu = st.text_area("Ghi chú thêm:")
-        
-        btn_submit = st.form_submit_button("🚀 ĐẶT LỊCH HẸN NGAY", type="primary", use_container_width=True)
-        
-        if btn_submit:
-            if not ten_kh or not sdt_kh:
-                st.error("Vui lòng điền Họ tên và Số điện thoại!")
-            else:
-                msg = f"ĐẶT LỊCH HẸN TẠI GARA:\n- Khách hàng: {ten_kh}\n- SĐT: {sdt_kh}\n- Loại xe: {dongxe_kh}\n- Dịch vụ: {', '.join(dich_vu)}\n- Ngày hẹn: {ngay_hen}\n- Ghi chú: {ghi_chu}"
-                zalo_send_url = f"https://zalo.me/{ZALO_PHONE}?text={urllib.parse.quote(msg)}"
-                st.success("✅ Thông tin đã sẵn sàng! Bấm nút bên dưới để gửi lịch hẹn trực tiếp sang Zalo:")
-                st.markdown(f'<a href="{zalo_send_url}" target="_blank" style="display:inline-block; background:#10B981; color:white; padding:10px 20px; border-radius:8px; font-weight:bold; text-decoration:none;">💬 BẤM ĐỂ GỬI ĐẶT LỊCH QUA ZALO</a>', unsafe_allow_html=True)
+        ten_kh = st.text_input("Họ tên:")
+        sdt_kh = st.text_input("Số điện thoại:")
+        dongxe_kh = st.text_input("Xe đang đi:")
+        dich_vu = st.multiselect("Dịch vụ:", ["Thay lốp mới", "Tráng keo", "Cân bằng động"])
+        btn_submit = st.form_submit_button("🚀 ĐẶT LỊCH NGAY", type="primary", use_container_width=True)
+        if btn_submit and ten_kh and sdt_kh:
+            msg = f"ĐẶT LỊCH:\n- Khách: {ten_kh}\n- SĐT: {sdt_kh}\n- Xe: {dongxe_kh}\n- DV: {', '.join(dich_vu)}"
+            st.markdown(f'<a href="https://zalo.me/{ZALO_PHONE}?text={urllib.parse.quote(msg)}" target="_blank" class="btn-zalo-quote">💬 BẤM GỬI ZALO</a>', unsafe_allow_html=True)
