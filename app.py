@@ -4,6 +4,7 @@ import re
 import urllib.parse
 import requests
 import os
+import streamlit.components.v1 as components
 # ==========================================
 # THÔNG TIN CỬA HÀNG & MÃ AI
 # ==========================================
@@ -324,8 +325,11 @@ with tab3:
             import streamlit.components.v1 as components
 
 # Đoạn mã lấy từ nút Installation của Coze
+# Hiển thị khung chat AI lên web
+st.markdown("---")
+st.subheader("💬 Trợ Lý Tư Vấn Lốp Xe AI")
+
 coze_html = """
-<script src="https://sf-cdn.coze.com/... (
 <script src="https://sf-cdn.coze.com/obj/unpkg-va/flow-platform/chat-app-sdk/1.2.0-beta.6/libs/oversea/index.js"></script>
 <script>
   new CozeWebSDK.WebChatClient({
@@ -333,19 +337,20 @@ coze_html = """
       bot_id: '7672001578140024885',
     },
     componentProps: {
-      title: 'Coze',
+      title: 'Trợ lý Lốp xe Cần Thơ',
     },
     auth: {
       type: 'token',
-      token: 'pat_********',
+      token: 'pat_GZzNnhGUnT1t8J5o9P1G1...',  # (giữ nguyên token thật của ông)
       onRefreshToken: function () {
-        return 'pat_********'
+        return 'pat_GZzNnhGUnT1t8J5o9P1G1...'
       }
     }
   });
-</script>) ..."></script>
+</script>
 """
 
+components.html(coze_html, height=650)
 # Hiển thị khung chat AI lên web
 st.markdown("---")
 st.subheader("💬 Trợ Lý Tư Vấn Lốp Xe AI")
