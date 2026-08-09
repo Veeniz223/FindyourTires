@@ -169,8 +169,10 @@ with tab2:
 # ==========================================
 st.markdown("---")
 st.subheader("💬 Trợ Lý Tư Vấn Lốp Xe AI")
+coze_html = """st.markdown("---")
+st.subheader("💬 Trợ Lý Tư Vấn Lốp Xe AI")
 
-coze_html = """
+coze_html =
 <script src="https://sf-cdn.coze.com/obj/unpkg-va/flow-platform/chat-app-sdk/1.2.0-beta.6/libs/oversea/index.js"></script>
 <script>
   new CozeWebSDK.WebChatClient({
@@ -178,11 +180,35 @@ coze_html = """
       bot_id: '7672001578140024885',
     },
     componentProps: {
-      title: 'Trợ lý Lốp xe Cần Thơ',
+      title: 'Coze',
+    },
+    auth: {
+      type: 'token',
+      token: 'pat_********',
+      onRefreshToken: function () {
+        return 'pat_********'
+      }
+    }
+  });
+</script>
+<script src="https://sf-cdn.coze.com/obj/unpkg-va/flow-platform/chat-app-sdk/1.2.0-beta.6/libs/oversea/index.js"></script>
+<script>
+  new CozeWebSDK.WebChatClient({
+    config: {
+      bot_id: '7672001578140024885',
+    },
+    componentProps: {
+      title: 'Coze',
+    },
+    auth: {
+      type: 'token',
+      token: 'pat_ĐOẠN_MÃ_DÀI_NGOẰNG_CỦA_ÔNG',
+      onRefreshToken: function () {
+        return 'pat_ĐOẠN_MÃ_DÀI_NGOẰNG_CỦA_ÔNG'
+      }
     }
   });
 </script>
 """
 
-# Chiều cao 600 để khung chat hoặc nút bong bóng nổi lên vừa vặn
 components.html(coze_html, height=600)
