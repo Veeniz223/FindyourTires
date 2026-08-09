@@ -253,8 +253,65 @@ with tab2:
                 Phong cách trả lời: Lịch sự, chuyên nghiệp, am hiểu sâu về kỹ thuật lốp xe (Michelin, Bridgestone, Yokohama, Hankook, Kumho...), công nghệ tráng keo chống đinh.
                 Mục tiêu: Đưa ra lời khuyên chuẩn xác, giải thích dễ hiểu và mời khách gọi Hotline hoặc ghé gara tại {DIA_CHI} để được hỗ trợ trực tiếp.
                 """
+                
+                # Tự động tìm model hỗ trợ generateContent trong tài khoản
+                available_models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
+                selected_model = 'models/gemini-1.5-flash'
+                
+                if available_models:
+                    # Ưu tiên lấy model flash có sẵn trong tài khoản
+                    flash_models = [m for m in available_models if 'flash' in m]
+                    selected_model = flash_models[0] if flash_models else available_models[0]
+
                 model = genai.GenerativeModel(
-                    model_name='gemini-1.5-flash-latest',
+                    model_name=selected_model,
+                    system_instruction=system_instruction
+                )
+                response = model.generate_content(user_prompt)
+                response_text = response.text
+            except Exception as e:
+                response_text = f"Lỗi kết nối AI: {e}"
+
+        st.session_state.messages.append({"role": "assistant", "content": response_text})
+        st.chat_message("assistant").write(response_text)# TAB 2: CHATBOT AI TƯ VẤN 24/7
+with tab2:
+    st.subheader("🤖 Trợ Lý AI Tư Vấn Lốp Xe 24/7")
+    st.write("Đặt câu hỏi cho AI (Ví dụ: *Lốp Michelin đi êm không?, Tráng keo chống đinh có bền không?, Xe CX5 nên thay lốp nào?...*)")
+
+    if "messages" not in st.session_state:
+        st.session_state.messages = [
+            {"role": "assistant", "content": f"Xin chào! Tôi là Trợ lý AI của **{TEN_NHANVIEN}** ({TEN_CUAHANG} - {DIA_CHI}). Bạn cần hỏi thông tin về loại lốp nào hay quy trình tráng keo chống đinh ạ?"}
+        ]
+
+    for msg in st.session_state.messages:
+        st.chat_message(msg["role"]).write(msg["content"])
+
+    if user_prompt := st.chat_input("Nhập câu hỏi của bạn tại đây..."):
+        st.session_state.messages.append({"role": "user", "content": user_prompt})
+        st.chat_message("user").write(user_prompt)
+
+        if not GEMINI_API_KEY or GEMINI_API_KEY == "DÁN_MÃ_API_CỦA_ÔNG_VÀO_ĐÂY":
+            response_text = "⚠️ Vui lòng cấu hình Mã GEMINI_API_KEY để bật Chatbot AI nhé ông!"
+        else:
+            try:
+                genai.configure(api_key=GEMINI_API_KEY)
+                system_instruction = f"""
+                Bạn là Trợ lý Chuyên viên Tư vấn Kỹ thuật Lốp xe Ô tô chuyên nghiệp của anh {TEN_NHANVIEN} ({CHUC_DANH}) làm việc tại {TEN_CUAHANG}, Địa chỉ: {DIA_CHI}, Hotline/Zalo: {HOTLINE}.
+                Phong cách trả lời: Lịch sự, chuyên nghiệp, am hiểu sâu về kỹ thuật lốp xe (Michelin, Bridgestone, Yokohama, Hankook, Kumho...), công nghệ tráng keo chống đinh.
+                Mục tiêu: Đưa ra lời khuyên chuẩn xác, giải thích dễ hiểu và mời khách gọi Hotline hoặc ghé gara tại {DIA_CHI} để được hỗ trợ trực tiếp.
+                """
+                
+                # Tự động tìm model hỗ trợ generateContent trong tài khoản
+                available_models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
+                selected_model = 'models/gemini-1.5-flash'
+                
+                if available_models:
+                    # Ưu tiên lấy model flash có sẵn trong tài khoản
+                    flash_models = [m for m in available_models if 'flash' in m]
+                    selected_model = flash_models[0] if flash_models else available_models[0]
+
+                model = genai.GenerativeModel(
+                    model_name=selected_model,
                     system_instruction=system_instruction
                 )
                 response = model.generate_content(user_prompt)
