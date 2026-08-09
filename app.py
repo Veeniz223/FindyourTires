@@ -2,17 +2,21 @@ import pandas as pd
 import streamlit as st
 import re
 import urllib.parse
+from google import genai
 
 # ==========================================
-# THÔNG TIN CỬA HÀNG & NHÂN VIÊN KINH DOANH
+# THÔNG TIN CỬA HÀNG & MÃ AI (SỬA TẠI ĐÂY)
 # ==========================================
 TEN_CUAHANG = "THẾ GIỚI LỐP XE Ô TÔ CẦN THƠ"
 TEN_NHANVIEN = "Dương Hoàng Vinh"
 CHUC_DANH = "Nhân viên kinh doanh"
-HOTLINE = "0937971684"               # Nhập SĐT của ông
-ZALO_PHONE = "0937971684"            # SĐT Zalo nhận báo giá & lịch hẹn
+HOTLINE = "0937971684"               # Ông sửa SĐT tại đây
+ZALO_PHONE = "0937971684"            # Ông sửa SĐT Zalo tại đây
 ZALO_LINK = f"https://zalo.me/{ZALO_PHONE}"
 DIA_CHI = "176, Phạm Hùng, Cái Răng, TP Cần Thơ" 
+
+# DÁN MÃ API KEY GEMINI CỦA ÔNG VÀO TRONG DẤU NGOẶC KÉP DƯỚI ĐÂY:
+GEMINI_API_KEY = "AQ.Ab8RN6LF_5ATF8WIPHZxXx8WDb8jUbnKQc9P0laWt9jSAbwo9Q"
 # ==========================================
 
 # 1. Cấu hình trang Web
@@ -130,7 +134,7 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # TẠO TABS CHỨC NĂNG
-tab1, tab2 = st.tabs(["🔍 TRA CỨU BÁO GIÁ LỐP", "📅 ĐẶT LỊCH HẸN TẠI GARA"])
+tab1, tab2, tab3 = st.tabs(["🔍 TRA CỨU BÁO GIÁ", "🤖 CHAT VỚI AI TƯ VẤN 24/7", "📅 ĐẶT LỊCH HẸN GARA"])
 
 with tab1:
     col1, col2 = st.columns([2, 1])
@@ -222,8 +226,47 @@ with tab1:
                 st.info(tu_van)
                 st.markdown(f'<a href="{zalo_quote_url}" target="_blank" class="btn-zalo-quote">📲 GỬI BÁO GIÁ NÀY QUA ZALO CHO KHÁCH</a><br><br>', unsafe_allow_html=True)
 
-# TAB 2: ĐẶT LỊCH HẸN
+# TAB 2: CHATBOT AI TƯ VẤN 24/7
 with tab2:
+    st.subheader("🤖 Trợ Lý AI Tư Vấn Lốp Xe 24/7")
+    st.write("Đặt câu hỏi cho AI (Ví dụ: *Lốp Michelin đi êm không?, Tráng keo chống đinh có bền không?, Xe CX5 nên thay lốp nào?...*)")
+
+    if "messages" not in st.session_state:
+        st.session_state.messages = [
+            {"role": "assistant", "content": f"Xin chào! Tôi là Trợ lý AI của **{TEN_NHANVIEN}** ({TEN_CUAHANG} - {DIA_CHI}). Bạn cần hỏi thông tin về loại lốp nào hay quy trình tráng keo chống đinh ạ?"}
+        ]
+
+    for msg in st.session_state.messages:
+        st.chat_message(msg["role"]).write(msg["content"])
+
+    if user_prompt := st.chat_input("Nhập câu hỏi của bạn tại đây..."):
+        st.session_state.messages.append({"role": "user", "content": user_prompt})
+        st.chat_message("user").write(user_prompt)
+
+        if GEMINI_API_KEY == "DÁN_MÃ_API_CỦA_ÔNG_VÀO_ĐÂY":
+            response_text = "⚠️ Vui lòng cấu hình Mã GEMINI_API_KEY ở file app.py để bật tính năng Chatbot AI nhé ông!"
+        else:
+            try:
+                client = genai.Client(api_key=GEMINI_API_KEY)
+                system_instruction = f"""
+                Bạn là Trợ lý Chuyên viên Tư vấn Kỹ thuật Lốp xe Ô tô chuyên nghiệp của anh {TEN_NHANVIEN} ({CHUC_DANH}) làm việc tại {TEN_CUAHANG}, Địa chỉ: {DIA_CHI}, Hotline/Zalo: {HOTLINE}.
+                Phong cách trả lời: Lịch sự, chuyên nghiệp, am hiểu sâu về kỹ thuật lốp xe (Michelin, Bridgestone, Yokohama, Hankook, Kumho...), công nghệ tráng keo chống đinh.
+                Mục tiêu: Đưa ra lời khuyên chuẩn xác, giải thích dễ hiểu và mời khách gọi Hotline hoặc ghé gara tại {DIA_CHI} để được hỗ trợ trực tiếp.
+                """
+                response = client.models.generate_content(
+                    model='gemini-2.5-flash',
+                    contents=user_prompt,
+                    config={'system_instruction': system_instruction}
+                )
+                response_text = response.text
+            except Exception as e:
+                response_text = f"Lỗi kết nối AI: {e}"
+
+        st.session_state.messages.append({"role": "assistant", "content": response_text})
+        st.chat_message("assistant").write(response_text)
+
+# TAB 3: ĐẶT LỊCH HẸN
+with tab3:
     st.subheader("📝 Đặt Lịch Hẹn Làm Lốp / Tráng Keo Tận Nơi")
     st.write("Khách hàng điền thông tin bên dưới để ưu tiên xếp lịch phục vụ nhanh nhất:")
     
