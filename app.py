@@ -2,32 +2,22 @@ import pandas as pd
 import streamlit as st
 import re
 import urllib.parse
-import requests
-import os
 import streamlit.components.v1 as components
+
 # ==========================================
-# THÔNG TIN CỬA HÀNG & MÃ AI
+# THÔNG TIN CỬA HÀNG
 # ==========================================
-TEN_CUAHANG = "THẾ GIỚI LỐP XE Ô TÔ CẦN THƠ"
+TEN_CUAHANG = "TRUNG TÂM LỐP XE Ô TÔ CẦN THƠ"
 TEN_NHANVIEN = "Dương Hoàng Vinh"
 CHUC_DANH = "Nhân viên kinh doanh"
-HOTLINE = "0937971684"               # Nhập SĐT của ông
-ZALO_PHONE = "0937971684"            # Nhập SĐT Zalo của ông
+HOTLINE = "0937971684"               
+ZALO_PHONE = "0937971684"            
 ZALO_LINK = f"https://zalo.me/{ZALO_PHONE}"
 DIA_CHI = "176, Phạm Hùng, Cái Răng, TP Cần Thơ" 
-
-# DÁN MÃ API CỦA ÔNG VÀO TRONG DẤU NGOẶC KÉP DƯỚI ĐÂY:
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "DAN_API_KEY_MOI_VAO_DAY").strip()
 # ==========================================
 
-# 1. Cấu hình trang Web
-st.set_page_config(
-    page_title=f"Tư Vấn Lốp Xe - {TEN_CUAHANG}",
-    page_icon="🛞",
-    layout="centered"
-)
+st.set_page_config(page_title=f"Tư Vấn Lốp Xe - {TEN_CUAHANG}", page_icon="🛞", layout="centered")
 
-# 2. Tùy chỉnh Giao diện CSS
 st.markdown("""
     <style>
     .stApp { background-color: #0e1117; }
@@ -54,7 +44,6 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Hàm chuyển đổi số tiền & làm sạch chuỗi
 def chuyen_thanh_so(val):
     if pd.isna(val): return 0.0
     if isinstance(val, (int, float)): return float(val)
@@ -65,7 +54,6 @@ def clean_text(text):
     if pd.isna(text): return ""
     return re.sub(r'[\s\-_.\/\\]+', '', str(text)).upper()
 
-# 3. Đọc dữ liệu Excel
 @st.cache_data
 def load_data():
     df = pd.read_excel("danh_muc_lop.xlsx", sheet_name=0)
@@ -82,11 +70,9 @@ except Exception as e:
     st.error(f"Lỗi đọc file Excel: {e}")
     st.stop()
 
-# Header Giao diện
 st.markdown('<div class="main-title">🛞 TRỢ LÝ TƯ VẤN LỐP XE Ô TÔ</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-title">Tra cứu báo giá trọn gói & gợi ý phân khúc chuẩn xác 24/7</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub-title">Tra cứu báo giá trọn gói chuẩn xác 24/7</div>', unsafe_allow_html=True)
 
-# Khung Thông Tin Cửa Hàng
 st.markdown(f"""
 <div class="contact-box">
     <div class="store-name">🏢 {TEN_CUAHANG}</div>
@@ -100,8 +86,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# TẠO TABS CHỨC NĂNG
-tab1, tab2, tab3 = st.tabs(["🔍 TRA CỨU", "🤖 CHAT VỚI AI 24/7", "📅 ĐẶT LỊCH HẸN"])
+tab1, tab2 = st.tabs(["🔍 TRA CỨU GIÁ", "📅 ĐẶT LỊCH HẸN"])
 
 with tab1:
     col1, col2 = st.columns([2, 1])
@@ -151,7 +136,7 @@ with tab1:
                 if nhu_cau == "Chạy dịch vụ / Taxi" and phan_khuc == "Gia đình": continue
                 if nhu_cau == "Đi gia đình (Cần êm)" and phan_khuc == "Dịch vụ": continue
 
-                zalo_txt = f"Chào bạn, tôi báo giá lốp {thuong_hieu} {ten_sp} (Size {size_lop}):\n- Lốp: {val_gia_lop:,.0f}đ\n- Tráng keo: {val_gia_keo:,.0f}đ\n👉 TỔNG: {tong_tien:,.0f}đ/quả.\nTư vấn: {TEN_NHANVIEN} ({HOTLINE})"
+                zalo_txt = f"Chào bạn, tôi báo giá lốp {thuong_hieu} {ten_sp} (Size {size_lop}):\n- Lốp: {val_gia_lop:,.0f}đ\n- Tráng keo: {val_gia_keo:,.0f}đ\n👉 TỔNG TRỌN GÓI: {tong_tien:,.0f}đ/quả.\nTư vấn: {TEN_NHANVIEN} ({HOTLINE})"
                 
                 st.markdown(f"""
                 <div class="tire-card">
@@ -167,165 +152,21 @@ with tab1:
                 st.info(tu_van)
                 st.markdown(f'<a href="https://zalo.me/{ZALO_PHONE}?text={urllib.parse.quote(zalo_txt)}" target="_blank" class="btn-zalo-quote">📲 GỬI BÁO GIÁ QUA ZALO</a><br><br>', unsafe_allow_html=True)
 
-# TAB 2: CHATBOT AI TƯ VẤN 24/7
 with tab2:
-    st.subheader("🤖 Trợ Lý AI Tư Vấn Lốp Xe 24/7")
-    st.write("Hỏi tôi về các loại lốp hoặc quy trình tráng keo nhé!")
-
-    if "messages" not in st.session_state:
-        st.session_state.messages = [{"role": "assistant", "content": f"Xin chào! Tôi là Trợ lý AI của **{TEN_NHANVIEN}**. Tôi có thể giúp gì cho bạn?"}]
-
-    for msg in st.session_state.messages: st.chat_message(msg["role"]).write(msg["content"])
-
-    if user_prompt := st.chat_input("Nhập câu hỏi của bạn tại đây...", key="ai_chat"):
-        st.session_state.messages.append({"role": "user", "content": user_prompt})
-        st.chat_message("user").write(user_prompt)
-
-        if not GEMINI_API_KEY or GEMINI_API_KEY == "DÁN_MÃ_API_CỦA_ÔNG_VÀO_ĐÂY":
-            response_text = "⚠️ Chưa có GEMINI_API_KEY. Hãy đặt API key mới vào biến GEMINI_API_KEY trong app.py hoặc biến môi trường GEMINI_API_KEY."
-        else:
-            try:
-                system_instruction = (
-                    f"Bạn là tư vấn viên kỹ thuật lốp xe tên {TEN_NHANVIEN} "
-                    f"làm việc tại {TEN_CUAHANG}. Lịch sự, am hiểu lốp xe. "
-                    "Không tự bịa giá, size hoặc mã gai. Nếu thiếu dữ liệu thì nói rõ."
-                )
-
-                # Gọi Gemini REST API trực tiếp, không dùng SDK cũ.
-                # Ưu tiên model Flash ổn định; nếu tài khoản không có model ưu tiên,
-                # tự kiểm tra danh sách model có quyền generateContent.
-                api_base = "https://generativelanguage.googleapis.com/v1beta"
-                headers = {
-                    "Content-Type": "application/json",
-                    "x-goog-api-key": GEMINI_API_KEY
-                }
-
-                preferred_models = ["gemini-2.5-flash", "gemini-2.0-flash"]
-                available_models = []
-
-                try:
-                    models_res = requests.get(
-                        f"{api_base}/models",
-                        headers={"x-goog-api-key": GEMINI_API_KEY},
-                        timeout=15
-                    )
-                    if models_res.ok:
-                        for model_info in models_res.json().get("models", []):
-                            name = model_info.get("name", "")
-                            methods = model_info.get("supportedGenerationMethods", [])
-                            if "generateContent" in methods:
-                                available_models.append(name.split("/")[-1])
-                except requests.RequestException:
-                    pass
-
-                model_name = next(
-                    (m for m in preferred_models if m in available_models),
-                    None
-                )
-
-                if model_name is None:
-                    if available_models:
-                        flash_models = [
-                            m for m in available_models
-                            if "flash" in m.lower() and "embedding" not in m.lower()
-                        ]
-                        model_name = flash_models[0] if flash_models else available_models[0]
-                    else:
-                        model_name = "gemini-2.5-flash"
-
-                api_url = f"{api_base}/models/{model_name}:generateContent"
-
-                payload = {
-                    "systemInstruction": {
-                        "parts": [{"text": system_instruction}]
-                    },
-                    "contents": [
-                        {
-                            "role": "user",
-                            "parts": [{"text": user_prompt}]
-                        }
-                    ],
-                    "generationConfig": {
-                        "temperature": 0.3,
-                        "maxOutputTokens": 1024
-                    }
-                }
-
-                res = requests.post(
-                    api_url,
-                    json=payload,
-                    headers=headers,
-                    timeout=30
-                )
-
-                try:
-                    data = res.json()
-                except ValueError:
-                    data = {}
-
-                if res.ok:
-                    candidates = data.get("candidates", [])
-                    if candidates:
-                        parts = candidates[0].get("content", {}).get("parts", [])
-                        response_text = "".join(
-                            part.get("text", "")
-                            for part in parts
-                            if part.get("text")
-                        ).strip()
-
-                        if not response_text:
-                            response_text = "⚠️ Gemini đã phản hồi nhưng không có nội dung."
-                    else:
-                        response_text = "⚠️ Gemini không trả về nội dung tư vấn."
-                else:
-                    err = data.get("error", {})
-                    code = err.get("code", res.status_code)
-                    message = err.get("message", res.text)
-
-                    if code == 404:
-                        response_text = (
-                            f"⛔ Model Gemini '{model_name}' không khả dụng cho API Key này. "
-                            "Hãy kiểm tra Gemini API/Google AI Studio và model được cấp quyền."
-                        )
-                    elif code in (400, 401, 403):
-                        response_text = (
-                            "⛔ API Key Gemini không hợp lệ, chưa được kích hoạt hoặc "
-                            "chưa có quyền gọi Gemini API. Hãy tạo/cập nhật API Key mới."
-                        )
-                    elif code == 429:
-                        response_text = (
-                            "⏳ Gemini đang giới hạn số lượt gọi (429). "
-                            "Vui lòng thử lại sau."
-                        )
-                    else:
-                        response_text = f"⛔ Gemini trả về lỗi HTTP {code}: {message}"
-
-            except requests.Timeout:
-                response_text = "⏱️ Gemini phản hồi quá lâu. Vui lòng thử lại."
-            except requests.RequestException as e:
-                response_text = f"🌐 Không kết nối được Gemini API: {e}"
-            except Exception as e:
-                response_text = f"Lỗi hệ thống: {e}"
-
-        st.session_state.messages.append({"role": "assistant", "content": response_text})
-        st.chat_message("assistant").write(response_text)
-
-# TAB 3: ĐẶT LỊCH HẸN
-with tab3:
-    st.subheader("📝 Đặt Lịch Hẹn")
+    st.subheader("📝 Đặt Lịch Hẹn Làm Lốp")
     with st.form("form_dat_lich"):
-        ten_kh = st.text_input("Họ tên:")
+        ten_kh = st.text_input("Họ tên khách hàng:")
         sdt_kh = st.text_input("Số điện thoại:")
         dongxe_kh = st.text_input("Xe đang đi:")
-        dich_vu = st.multiselect("Dịch vụ:", ["Thay lốp mới", "Tráng keo", "Cân bằng động"])
+        dich_vu = st.multiselect("Dịch vụ cần làm:", ["Thay lốp mới", "Tráng keo chống đinh", "Cân bằng động"])
         btn_submit = st.form_submit_button("🚀 ĐẶT LỊCH NGAY", type="primary", use_container_width=True)
         if btn_submit and ten_kh and sdt_kh:
-            msg = f"ĐẶT LỊCH:\n- Khách: {ten_kh}\n- SĐT: {sdt_kh}\n- Xe: {dongxe_kh}\n- DV: {', '.join(dich_vu)}"
-            st.markdown(f'<a href="https://zalo.me/{ZALO_PHONE}?text={urllib.parse.quote(msg)}" target="_blank" class="btn-zalo-quote">💬 BẤM GỬI ZALO</a>', unsafe_allow_html=True)
-            import streamlit.components.v1 as components
+            msg = f"ĐẶT LỊCH GARA:\n- Khách: {ten_kh}\n- SĐT: {sdt_kh}\n- Xe: {dongxe_kh}\n- DV: {', '.join(dich_vu)}"
+            st.markdown(f'<a href="https://zalo.me/{ZALO_PHONE}?text={urllib.parse.quote(msg)}" target="_blank" class="btn-zalo-quote">💬 BẤM GỬI LỊCH HẸN QUA ZALO</a>', unsafe_allow_html=True)
 
-# Đoạn mã lấy từ nút Installation của Coze
-# Hiển thị khung chat AI lên web
+# ==========================================
+# KHUNG CHAT AI COZE Ở CUỐI TRANG
+# ==========================================
 st.markdown("---")
 st.subheader("💬 Trợ Lý Tư Vấn Lốp Xe AI")
 
@@ -341,7 +182,7 @@ coze_html = """
     },
     auth: {
       type: 'token',
-      token: 'pat_GZzNnhGUnT1t8J5o9P1G1...',  # (giữ nguyên token thật của ông)
+      token: 'pat_GZzNnhGUnT1t8J5o9P1G1...',
       onRefreshToken: function () {
         return 'pat_GZzNnhGUnT1t8J5o9P1G1...'
       }
@@ -350,8 +191,4 @@ coze_html = """
 </script>
 """
 
-components.html(coze_html, height=650)
-# Hiển thị khung chat AI lên web
-st.markdown("---")
-st.subheader("💬 Trợ Lý Tư Vấn Lốp Xe AI")
-components.html(coze_html, height=650)
+components.html(coze_html, height=800)
