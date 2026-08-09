@@ -188,7 +188,7 @@ with tab2:
                 genai.configure(api_key=GEMINI_API_KEY)
                 system_instruction = f"Bạn là tư vấn viên kỹ thuật lốp xe của anh {TEN_NHANVIEN} tại {TEN_CUAHANG}. Lịch sự, am hiểu lốp xe."
                 # Gọi đúng tên model siêu chuẩn, không bao giờ lỗi 404
-                model = genai.GenerativeModel(model_name='gemini-1.5-flash', system_instruction=system_instruction)
+                model = genai.GenerativeModel(model_name='gemini-pro', system_instruction=system_instruction)
                 response = model.generate_content(user_prompt)
                 response_text = response.text
             except Exception as e:
