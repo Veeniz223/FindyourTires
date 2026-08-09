@@ -9,8 +9,8 @@ import urllib.parse
 TEN_CUAHANG = "THẾ GIỚI LỐP XE Ô TÔ CẦN THƠ"
 TEN_NHANVIEN = "Dương Hoàng Vinh"
 CHUC_DANH = "Nhân viên kinh doanh"
-HOTLINE = "0937971684"               # Ông sửa lại SĐT của ông tại đây
-ZALO_PHONE = "0937971684"            # Ông sửa lại SĐT Zalo tại đây
+HOTLINE = "0937971684"               # Nhập SĐT của ông
+ZALO_PHONE = "0937971684"            # SĐT Zalo nhận báo giá & lịch hẹn
 ZALO_LINK = f"https://zalo.me/{ZALO_PHONE}"
 DIA_CHI = "176, Phạm Hùng, Cái Răng, TP Cần Thơ" 
 # ==========================================
@@ -51,7 +51,12 @@ st.markdown("""
         background: #1e2638; border-radius: 12px; padding: 20px;
         margin-bottom: 15px; border: 1px solid #2e3b52; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
-    .tire-name { color: #FFFFFF; font-size: 1.3rem; font-weight: 700; margin-bottom: 10px; }
+    .tire-name { color: #FFFFFF; font-size: 1.25rem; font-weight: 700; margin-bottom: 6px; }
+    .car-version-box {
+        background-color: #111827; border-left: 4px solid #38BDF8;
+        padding: 8px 12px; border-radius: 4px; margin-bottom: 12px;
+        color: #38BDF8; font-weight: 600; font-size: 0.95rem;
+    }
 
     /* Badges */
     .badge-cao-cap { background-color: #f59e0b; color: #000; padding: 3px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
@@ -67,7 +72,7 @@ st.markdown("""
     .btn-zalo-quote {
         display: inline-block; background-color: #0068FF; color: white !important;
         padding: 10px 18px; border-radius: 8px; font-weight: bold;
-        text-decoration: none; font-size: 0.9rem; margin-top: 10px; text-align: center;
+        text-decoration: none; font-size: 0.9rem; margin-top: 8px; text-align: center;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -80,10 +85,9 @@ def chuyen_thanh_so(val):
     numbers_only = re.sub(r'[^\d]', '', s)
     return float(numbers_only) if numbers_only else 0.0
 
-# Hàm làm sạch chuỗi tìm kiếm (Loại bỏ dấu gạch ngang, khoảng trắng)
+# Hàm làm sạch chuỗi
 def clean_text(text):
-    if pd.isna(text):
-        return ""
+    if pd.isna(text): return ""
     return re.sub(r'[\s\-_.\/\\]+', '', str(text)).upper()
 
 # 3. Đọc dữ liệu Excel
@@ -131,7 +135,7 @@ tab1, tab2 = st.tabs(["🔍 TRA CỨU BÁO GIÁ LỐP", "📅 ĐẶT LỊCH HẸ
 with tab1:
     col1, col2 = st.columns([2, 1])
     with col1:
-        tim_kiem = st.text_input("🔍 Mã Size lốp HOẶC Tên Dòng Xe:", value="205/55R16", placeholder="Ví dụ: 205/55R16, CX5, Xpander...")
+        tim_kiem = st.text_input("🔍 Nhập Mã Size lốp HOẶC Tên Dòng Xe:", value="CX5", placeholder="Ví dụ: CX5, Xpander, 205/55R16...")
     with col2:
         nhu_cau = st.selectbox("🎯 Nhu cầu sử dụng:", ["Tất cả nhu cầu", "Chạy dịch vụ / Taxi", "Đi gia đình (Cần êm)"])
 
@@ -140,33 +144,32 @@ with tab1:
     if st.button("🚀 TÌM LỐP & XEM BÁO GIÁ TRỌN GÓI", type="primary", use_container_width=True):
         raw_input = tim_kiem.strip()
         cleaned_input = clean_text(raw_input)
-        
         words = [clean_text(w) for w in re.split(r'\s+', raw_input) if clean_text(w)]
 
         def match_row(row):
             row_cleaned_str = clean_text(" ".join(row.astype(str)))
-            if cleaned_input in row_cleaned_str:
-                return True
-            if words and all(w in row_cleaned_str for w in words):
-                return True
+            if cleaned_input in row_cleaned_str: return True
+            if words and all(w in row_cleaned_str for w in words): return True
             return False
 
         ket_qua = df[df.apply(match_row, axis=1)]
         
         if ket_qua.empty:
-            st.warning(f"Rất tiếc, không tìm thấy kết quả cho từ khóa '{raw_input}'!")
+            st.warning(f"Rất tiếc, không tìm thấy kết quả nào cho từ khóa '{raw_input}'!")
         else:
             st.success(f"✅ Tìm thấy **{len(ket_qua)}** lựa chọn phù hợp cho từ khóa **'{raw_input}'**")
             
             for index, row in ket_qua.iterrows():
-                thuong_hieu, ten_sp, dong_xe = "", "", ""
+                thuong_hieu, ten_sp, dong_xe, size_lop = "", "", "", ""
                 val_gia_lop, val_gia_keo = 0.0, 0.0
                 
                 for col in df.columns:
                     col_lower = str(col).strip().lower()
                     val = row[col]
                     
-                    if 'thương hiệu' in col_lower or 'hãng' in col_lower or 'brand' in col_lower:
+                    if 'size' in col_lower or 'cỡ' in col_lower:
+                        size_lop = str(val) if pd.notna(val) else ""
+                    elif 'thương hiệu' in col_lower or 'hãng' in col_lower or 'brand' in col_lower:
                         thuong_hieu = str(val) if pd.notna(val) else ""
                     elif 'sản phẩm' in col_lower or 'gai' in col_lower or 'tên' in col_lower:
                         ten_sp = str(val) if pd.notna(val) else ""
@@ -197,16 +200,16 @@ with tab1:
                 if nhu_cau == "Chạy dịch vụ / Taxi" and phan_khuc == "Gia đình / Cao cấp": continue
                 if nhu_cau == "Đi gia đình (Cần êm)" and phan_khuc == "Dịch vụ / Tiết kiệm": continue
 
-                text_zalo = f"Chào bạn, {TEN_CUAHANG} xin gửi báo giá lốp {thuong_hieu} {ten_sp}:\n- Giá lốp: {val_gia_lop:,.0f}đ/quả\n- Tráng keo chống đinh: {val_gia_keo:,.0f}đ/quả\n👉 TỔNG TRỌN GÓI: {tong_tien:,.0f}đ/quả.\nTư vấn trực tiếp: {TEN_NHANVIEN} ({HOTLINE})"
+                text_zalo = f"Chào bạn, {TEN_CUAHANG} xin gửi báo giá lốp {thuong_hieu} {ten_sp} (Size {size_lop}):\n- Dành cho: {dong_xe}\n- Giá lốp: {val_gia_lop:,.0f}đ/quả\n- Tráng keo chống đinh: {val_gia_keo:,.0f}đ/quả\n👉 TỔNG TRỌN GÓI: {tong_tien:,.0f}đ/quả.\nTư vấn trực tiếp: {TEN_NHANVIEN} ({HOTLINE})"
                 zalo_quote_url = f"https://zalo.me/{ZALO_PHONE}?text={urllib.parse.quote(text_zalo)}"
 
                 st.markdown(f"""
                 <div class="tire-card">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div class="tire-name">🔹 {thuong_hieu if thuong_hieu else 'Lốp xe'} {ten_sp}</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <div class="tire-name">🔹 {thuong_hieu if thuong_hieu else 'Lốp xe'} {ten_sp} (Size: <span style="color: #FACC15;">{size_lop}</span>)</div>
                         {badge_html}
                     </div>
-                    {"<p style='color: #9CA3AF; margin-bottom: 8px;'>🚗 <b>Xe tương thích:</b> " + dong_xe + "</p>" if dong_xe else ""}
+                    {"<div class='car-version-box'>🚗 <b>Dòng xe & Phiên bản tương thích:</b> " + dong_xe + "</div>" if dong_xe else ""}
                     <div class="detail-price">🛞 <b>Giá lốp:</b> {val_gia_lop:,.0f} VNĐ/quả</div>
                     <div class="detail-price">🛡️ <b>Giá tráng keo chống đinh:</b> {val_gia_keo:,.0f} VNĐ/quả</div>
                     <div class="price-box">
@@ -227,7 +230,7 @@ with tab2:
     with st.form("form_dat_lich"):
         ten_kh = st.text_input("Họ và tên khách hàng:")
         sdt_kh = st.text_input("Số điện thoại liên hệ:")
-        dongxe_kh = st.text_input("Dòng xe đang đi (Ví dụ: Xpander, Camry, CX5...):")
+        dongxe_kh = st.text_input("Dòng xe & Phiên bản đang đi (Ví dụ: CX5 bản Premium, Xpander Cross...):")
         dich_vu = st.multiselect("Dịch vụ cần làm:", ["Thay lốp mới", "Tráng keo chống đinh", "Cân bằng động / Cân chỉnh thước lái", "Vá lốp lưu động"])
         ngay_hen = st.date_input("Ngày dự định ghé gara:")
         ghi_chu = st.text_area("Ghi chú thêm:")
