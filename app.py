@@ -191,4 +191,5 @@ coze_html = """
 </script>
 """
 
-components.html(coze_html, height=800)
+# Chỉnh chiều cao vừa khít 500 để khung chat gọn gàng, không bị hở khoảng trắng thừa
+components.html(coze_html, height=500)
