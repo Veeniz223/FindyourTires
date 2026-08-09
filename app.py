@@ -254,7 +254,7 @@ with tab2:
                 Mục tiêu: Đưa ra lời khuyên chuẩn xác, giải thích dễ hiểu và mời khách gọi Hotline hoặc ghé gara tại {DIA_CHI} để được hỗ trợ trực tiếp.
                 """
                 model = genai.GenerativeModel(
-                    model_name='gemini-1.5-flash',
+                    model_name='gemini-2.5-flash',
                     system_instruction=system_instruction
                 )
                 response = model.generate_content(user_prompt)
