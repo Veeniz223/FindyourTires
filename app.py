@@ -3,6 +3,7 @@ import streamlit as st
 import re
 import urllib.parse
 import requests
+import os
 # ==========================================
 # THÔNG TIN CỬA HÀNG & MÃ AI
 # ==========================================
@@ -15,7 +16,7 @@ ZALO_LINK = f"https://zalo.me/{ZALO_PHONE}"
 DIA_CHI = "176, Phạm Hùng, Cái Răng, TP Cần Thơ" 
 
 # DÁN MÃ API CỦA ÔNG VÀO TRONG DẤU NGOẶC KÉP DƯỚI ĐÂY:
-GEMINI_API_KEY = st.secrets.get("GEMINI_API_KEY", "")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "DAN_API_KEY_MOI_VAO_DAY").strip()
 # ==========================================
 
 # 1. Cấu hình trang Web
@@ -180,26 +181,128 @@ with tab2:
         st.chat_message("user").write(user_prompt)
 
         if not GEMINI_API_KEY or GEMINI_API_KEY == "DÁN_MÃ_API_CỦA_ÔNG_VÀO_ĐÂY":
-            response_text = "⚠️ Hãy dán mã API Key vào file app.py ở dòng 18 nhé."
+            response_text = "⚠️ Chưa có GEMINI_API_KEY. Hãy đặt API key mới vào biến GEMINI_API_KEY trong app.py hoặc biến môi trường GEMINI_API_KEY."
         else:
             try:
-                system_instruction = f"Bạn là tư vấn viên kỹ thuật lốp xe tên {TEN_NHANVIEN} làm việc tại {TEN_CUAHANG}. Lịch sự, am hiểu lốp xe."
-                
-                # Bắn thẳng API trực tiếp (Né mọi lỗi thư viện)
-                api_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY.strip()}"
-                payload = {
-                    "contents": [{"parts": [{"text": user_prompt}]}],
-                    "systemInstruction": {"parts": [{"text": system_instruction}]}
+                system_instruction = (
+                    f"Bạn là tư vấn viên kỹ thuật lốp xe tên {TEN_NHANVIEN} "
+                    f"làm việc tại {TEN_CUAHANG}. Lịch sự, am hiểu lốp xe. "
+                    "Không tự bịa giá, size hoặc mã gai. Nếu thiếu dữ liệu thì nói rõ."
+                )
+
+                # Gọi Gemini REST API trực tiếp, không dùng SDK cũ.
+                # Ưu tiên model Flash ổn định; nếu tài khoản không có model ưu tiên,
+                # tự kiểm tra danh sách model có quyền generateContent.
+                api_base = "https://generativelanguage.googleapis.com/v1beta"
+                headers = {
+                    "Content-Type": "application/json",
+                    "x-goog-api-key": GEMINI_API_KEY
                 }
-                headers = {"Content-Type": "application/json"}
-                
-                res = requests.post(api_url, json=payload, headers=headers)
-                
-                if res.status_code == 200:
-                    response_text = res.json()["candidates"][0]["content"]["parts"][0]["text"]
+
+                preferred_models = ["gemini-2.5-flash", "gemini-2.0-flash"]
+                available_models = []
+
+                try:
+                    models_res = requests.get(
+                        f"{api_base}/models",
+                        headers={"x-goog-api-key": GEMINI_API_KEY},
+                        timeout=15
+                    )
+                    if models_res.ok:
+                        for model_info in models_res.json().get("models", []):
+                            name = model_info.get("name", "")
+                            methods = model_info.get("supportedGenerationMethods", [])
+                            if "generateContent" in methods:
+                                available_models.append(name.split("/")[-1])
+                except requests.RequestException:
+                    pass
+
+                model_name = next(
+                    (m for m in preferred_models if m in available_models),
+                    None
+                )
+
+                if model_name is None:
+                    if available_models:
+                        flash_models = [
+                            m for m in available_models
+                            if "flash" in m.lower() and "embedding" not in m.lower()
+                        ]
+                        model_name = flash_models[0] if flash_models else available_models[0]
+                    else:
+                        model_name = "gemini-2.5-flash"
+
+                api_url = f"{api_base}/models/{model_name}:generateContent"
+
+                payload = {
+                    "systemInstruction": {
+                        "parts": [{"text": system_instruction}]
+                    },
+                    "contents": [
+                        {
+                            "role": "user",
+                            "parts": [{"text": user_prompt}]
+                        }
+                    ],
+                    "generationConfig": {
+                        "temperature": 0.3,
+                        "maxOutputTokens": 1024
+                    }
+                }
+
+                res = requests.post(
+                    api_url,
+                    json=payload,
+                    headers=headers,
+                    timeout=30
+                )
+
+                try:
+                    data = res.json()
+                except ValueError:
+                    data = {}
+
+                if res.ok:
+                    candidates = data.get("candidates", [])
+                    if candidates:
+                        parts = candidates[0].get("content", {}).get("parts", [])
+                        response_text = "".join(
+                            part.get("text", "")
+                            for part in parts
+                            if part.get("text")
+                        ).strip()
+
+                        if not response_text:
+                            response_text = "⚠️ Gemini đã phản hồi nhưng không có nội dung."
+                    else:
+                        response_text = "⚠️ Gemini không trả về nội dung tư vấn."
                 else:
-                    # Nếu dán sai API Key, nó sẽ báo rõ lỗi tại đây
-                    response_text = f"⛔ Báo lỗi từ máy chủ: Mã API Key của ông bị sai hoặc chưa kích hoạt. (Chi tiết: {res.text})"
+                    err = data.get("error", {})
+                    code = err.get("code", res.status_code)
+                    message = err.get("message", res.text)
+
+                    if code == 404:
+                        response_text = (
+                            f"⛔ Model Gemini '{model_name}' không khả dụng cho API Key này. "
+                            "Hãy kiểm tra Gemini API/Google AI Studio và model được cấp quyền."
+                        )
+                    elif code in (400, 401, 403):
+                        response_text = (
+                            "⛔ API Key Gemini không hợp lệ, chưa được kích hoạt hoặc "
+                            "chưa có quyền gọi Gemini API. Hãy tạo/cập nhật API Key mới."
+                        )
+                    elif code == 429:
+                        response_text = (
+                            "⏳ Gemini đang giới hạn số lượt gọi (429). "
+                            "Vui lòng thử lại sau."
+                        )
+                    else:
+                        response_text = f"⛔ Gemini trả về lỗi HTTP {code}: {message}"
+
+            except requests.Timeout:
+                response_text = "⏱️ Gemini phản hồi quá lâu. Vui lòng thử lại."
+            except requests.RequestException as e:
+                response_text = f"🌐 Không kết nối được Gemini API: {e}"
             except Exception as e:
                 response_text = f"Lỗi hệ thống: {e}"
 
