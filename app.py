@@ -16,7 +16,7 @@ ZALO_LINK = f"https://zalo.me/{ZALO_PHONE}"
 DIA_CHI = "176, Phạm Hùng, Cái Răng, TP Cần Thơ" 
 
 # DÁN MÃ API CỦA ÔNG VÀO TRONG DẤU NGOẶC KÉP DƯỚI ĐÂY:
-GEMINI_API_KEY = "AQ.Ab8RN6LF_5ATF8WIPHZxXx8WDb8jUbnKQc9P0laWt9jSAbwo9Q"
+GEMINI_API_KEY = "AQ.Ab8RN6LEpiNiAkcvoJrd56554wXPX3o2pJwPa4BN5lr8Mns7Zw"
 # ==========================================
 
 # 1. Cấu hình trang Web
