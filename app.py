@@ -2,8 +2,7 @@ import pandas as pd
 import streamlit as st
 import re
 import urllib.parse
-import google.generativeai as genai
-
+import requests
 # ==========================================
 # THÔNG TIN CỬA HÀNG & MÃ AI
 # ==========================================
@@ -176,23 +175,33 @@ with tab2:
 
     for msg in st.session_state.messages: st.chat_message(msg["role"]).write(msg["content"])
 
-    # Đã thêm key="ai_chat" để chống lỗi trùng lặp DuplicateElementId
     if user_prompt := st.chat_input("Nhập câu hỏi của bạn tại đây...", key="ai_chat"):
         st.session_state.messages.append({"role": "user", "content": user_prompt})
         st.chat_message("user").write(user_prompt)
 
         if not GEMINI_API_KEY or GEMINI_API_KEY == "DÁN_MÃ_API_CỦA_ÔNG_VÀO_ĐÂY":
-            response_text = "⚠️ Hãy dán mã API Key vào file app.py để dùng tính năng này nhé."
+            response_text = "⚠️ Hãy dán mã API Key vào file app.py ở dòng 18 nhé."
         else:
             try:
-                genai.configure(api_key=GEMINI_API_KEY)
-                system_instruction = f"Bạn là tư vấn viên kỹ thuật lốp xe của anh {TEN_NHANVIEN} tại {TEN_CUAHANG}. Lịch sự, am hiểu lốp xe."
-                # Gọi đúng tên model siêu chuẩn, không bao giờ lỗi 404
-                model = genai.GenerativeModel(model_name='gemini-pro', system_instruction=system_instruction)
-                response = model.generate_content(user_prompt)
-                response_text = response.text
+                system_instruction = f"Bạn là tư vấn viên kỹ thuật lốp xe tên {TEN_NHANVIEN} làm việc tại {TEN_CUAHANG}. Lịch sự, am hiểu lốp xe."
+                
+                # Bắn thẳng API trực tiếp (Né mọi lỗi thư viện)
+                api_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY.strip()}"
+                payload = {
+                    "contents": [{"parts": [{"text": user_prompt}]}],
+                    "systemInstruction": {"parts": [{"text": system_instruction}]}
+                }
+                headers = {"Content-Type": "application/json"}
+                
+                res = requests.post(api_url, json=payload, headers=headers)
+                
+                if res.status_code == 200:
+                    response_text = res.json()["candidates"][0]["content"]["parts"][0]["text"]
+                else:
+                    # Nếu dán sai API Key, nó sẽ báo rõ lỗi tại đây
+                    response_text = f"⛔ Báo lỗi từ máy chủ: Mã API Key của ông bị sai hoặc chưa kích hoạt. (Chi tiết: {res.text})"
             except Exception as e:
-                response_text = f"Lỗi: {e}"
+                response_text = f"Lỗi hệ thống: {e}"
 
         st.session_state.messages.append({"role": "assistant", "content": response_text})
         st.chat_message("assistant").write(response_text)
