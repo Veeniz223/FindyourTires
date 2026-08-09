@@ -2,10 +2,10 @@ import pandas as pd
 import streamlit as st
 import re
 import urllib.parse
-from google import genai
+import google.generativeai as genai
 
 # ==========================================
-# THÔNG TIN CỬA HÀNG & MÃ AI (SỬA TẠI ĐÂY)
+# THÔNG TIN CỬA HÀNG & MÃ AI
 # ==========================================
 TEN_CUAHANG = "THẾ GIỚI LỐP XE Ô TÔ CẦN THƠ"
 TEN_NHANVIEN = "Dương Hoàng Vinh"
@@ -15,8 +15,8 @@ ZALO_PHONE = "0937971684"            # Ông sửa SĐT Zalo tại đây
 ZALO_LINK = f"https://zalo.me/{ZALO_PHONE}"
 DIA_CHI = "176, Phạm Hùng, Cái Răng, TP Cần Thơ" 
 
-# DÁN MÃ API KEY GEMINI CỦA ÔNG VÀO TRONG DẤU NGOẶC KÉP DƯỚI ĐÂY:
-GEMINI_API_KEY = "AQ.Ab8RN6LF_5ATF8WIPHZxXx8WDb8jUbnKQc9P0laWt9jSAbwo9Q"
+# Đọc API Key từ Streamlit Secrets hoặc biến khai báo
+GEMINI_API_KEY = st.secrets.get("GEMINI_API_KEY", "AQ.Ab8RN6LF_5ATF8WIPHZxXx8WDb8jUbnKQc9P0laWt9jSAbwo9Q")
 # ==========================================
 
 # 1. Cấu hình trang Web
@@ -243,21 +243,21 @@ with tab2:
         st.session_state.messages.append({"role": "user", "content": user_prompt})
         st.chat_message("user").write(user_prompt)
 
-        if GEMINI_API_KEY == "DÁN_MÃ_API_CỦA_ÔNG_VÀO_ĐÂY":
-            response_text = "⚠️ Vui lòng cấu hình Mã GEMINI_API_KEY ở file app.py để bật tính năng Chatbot AI nhé ông!"
+        if not GEMINI_API_KEY or GEMINI_API_KEY == "DÁN_MÃ_API_CỦA_ÔNG_VÀO_ĐÂY":
+            response_text = "⚠️ Vui lòng cấu hình Mã GEMINI_API_KEY để bật Chatbot AI nhé ông!"
         else:
             try:
-                client = genai.Client(api_key=GEMINI_API_KEY)
+                genai.configure(api_key=GEMINI_API_KEY)
                 system_instruction = f"""
                 Bạn là Trợ lý Chuyên viên Tư vấn Kỹ thuật Lốp xe Ô tô chuyên nghiệp của anh {TEN_NHANVIEN} ({CHUC_DANH}) làm việc tại {TEN_CUAHANG}, Địa chỉ: {DIA_CHI}, Hotline/Zalo: {HOTLINE}.
                 Phong cách trả lời: Lịch sự, chuyên nghiệp, am hiểu sâu về kỹ thuật lốp xe (Michelin, Bridgestone, Yokohama, Hankook, Kumho...), công nghệ tráng keo chống đinh.
                 Mục tiêu: Đưa ra lời khuyên chuẩn xác, giải thích dễ hiểu và mời khách gọi Hotline hoặc ghé gara tại {DIA_CHI} để được hỗ trợ trực tiếp.
                 """
-                response = client.models.generate_content(
-                    model='gemini-2.5-flash',
-                    contents=user_prompt,
-                    config={'system_instruction': system_instruction}
+                model = genai.GenerativeModel(
+                    model_name='gemini-1.5-flash',
+                    system_instruction=system_instruction
                 )
+                response = model.generate_content(user_prompt)
                 response_text = response.text
             except Exception as e:
                 response_text = f"Lỗi kết nối AI: {e}"
