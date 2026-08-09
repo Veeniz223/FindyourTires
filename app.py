@@ -321,3 +321,32 @@ with tab3:
         if btn_submit and ten_kh and sdt_kh:
             msg = f"ĐẶT LỊCH:\n- Khách: {ten_kh}\n- SĐT: {sdt_kh}\n- Xe: {dongxe_kh}\n- DV: {', '.join(dich_vu)}"
             st.markdown(f'<a href="https://zalo.me/{ZALO_PHONE}?text={urllib.parse.quote(msg)}" target="_blank" class="btn-zalo-quote">💬 BẤM GỬI ZALO</a>', unsafe_allow_html=True)
+            import streamlit.components.v1 as components
+
+# Đoạn mã lấy từ nút Installation của Coze
+coze_html = """
+<script src="https://sf-cdn.coze.com/... (
+<script src="https://sf-cdn.coze.com/obj/unpkg-va/flow-platform/chat-app-sdk/1.2.0-beta.6/libs/oversea/index.js"></script>
+<script>
+  new CozeWebSDK.WebChatClient({
+    config: {
+      bot_id: '7672001578140024885',
+    },
+    componentProps: {
+      title: 'Coze',
+    },
+    auth: {
+      type: 'token',
+      token: 'pat_********',
+      onRefreshToken: function () {
+        return 'pat_********'
+      }
+    }
+  });
+</script>) ..."></script>
+"""
+
+# Hiển thị khung chat AI lên web
+st.markdown("---")
+st.subheader("💬 Trợ Lý Tư Vấn Lốp Xe AI")
+components.html(coze_html, height=650)
