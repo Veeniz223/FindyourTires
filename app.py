@@ -225,7 +225,6 @@ with tab1:
                 
                 st.info(tu_van)
                 st.markdown(f'<a href="{zalo_quote_url}" target="_blank" class="btn-zalo-quote">📲 GỬI BÁO GIÁ NÀY QUA ZALO CHO KHÁCH</a><br><br>', unsafe_allow_html=True)
-
 # TAB 2: CHATBOT AI TƯ VẤN 24/7
 with tab2:
     st.subheader("🤖 Trợ Lý AI Tư Vấn Lốp Xe 24/7")
@@ -239,7 +238,7 @@ with tab2:
     for msg in st.session_state.messages:
         st.chat_message(msg["role"]).write(msg["content"])
 
-    if user_prompt := st.chat_input("Nhập câu hỏi của bạn tại đây..."):
+    if user_prompt := st.chat_input("Nhập câu hỏi của bạn tại đây...", key="ai_chat_input"):
         st.session_state.messages.append({"role": "user", "content": user_prompt})
         st.chat_message("user").write(user_prompt)
 
