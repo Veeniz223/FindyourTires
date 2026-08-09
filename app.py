@@ -179,17 +179,10 @@ coze_html = """
     },
     componentProps: {
       title: 'Trợ lý Lốp xe Cần Thơ',
-    },
-    auth: {
-      type: 'token',
-      token: 'pat_GZzNnhGUnT1t8J5o9P1G1...',
-      onRefreshToken: function () {
-        return 'pat_GZzNnhGUnT1t8J5o9P1G1...'
-      }
     }
   });
 </script>
 """
 
-# Chỉnh chiều cao vừa khít 500 để khung chat gọn gàng, không bị hở khoảng trắng thừa
-components.html(coze_html, height=500)
+# Chiều cao 600 để khung chat hoặc nút bong bóng nổi lên vừa vặn
+components.html(coze_html, height=600)
